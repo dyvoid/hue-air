@@ -1,4 +1,4 @@
-package
+package nl.imotion.hue.entities
 {
     import flash.utils.Dictionary;
 

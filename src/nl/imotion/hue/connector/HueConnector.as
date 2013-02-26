@@ -1,4 +1,4 @@
-package
+package nl.imotion.hue.connector
 {
     import flash.net.URLRequestMethod;
 
@@ -9,7 +9,7 @@ package
      * @author Pieter van de Sluis
      */
 
-    public class HueApi
+    public class HueConnector
     {
         // ____________________________________________________________________________________________________
         // PROPERTIES
@@ -20,17 +20,34 @@ package
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
-        public function HueApi()
+        public function HueConnector( ipAddress:String, userName:String = null )
         {
-            init();
+            this.ipAddress = ipAddress;
+            this.userName = userName;
         }
 
         // ____________________________________________________________________________________________________
         // PUBLIC
 
-        public function register( username:String, deviceType:String, resultCallback:Function = null, faultCallback:Function = null  ):HueDelegate
+        public function doRequest( path:String = "", data:String = null, method:String = URLRequestMethod.GET, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            var data:String = '{"username": "'+ username +'", "devicetype": "'+ deviceType +'"}';
+            var delegate:HueDelegate = new HueDelegate( path, data, method, [ resultCallback ], [ faultCallback ] );
+            delegate.addEventListener( AsyncDelegateEvent.RESULT, handleDelegateResult );
+            delegate.addEventListener( AsyncDelegateEvent.FAULT, handleDelegateFault );
+            delegate.execute();
+
+            return delegate;
+        }
+
+
+        public function register( userName:String, deviceType:String, resultCallback:Function = null, faultCallback:Function = null  ):HueDelegate
+        {
+            var data:String = JSON.stringify (
+                {
+                    "username": userName,
+                    "devicetype": deviceType
+                }
+            );
 
             return doRequest( "register", data, URLRequestMethod.POST, resultCallback, faultCallback );
         }
@@ -42,7 +59,7 @@ package
         }
 
 
-        public function getLightInfo( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        public function getLights( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doGet( "/lights", null, resultCallback, faultCallback );
         }
@@ -51,6 +68,12 @@ package
         public function doLightRequest( id:String, data:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doPut( "/lights/"+id+"/state", data, resultCallback, faultCallback );
+        }
+
+
+        public function doGroupRequest( id:String, data:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            return doPut( "/groups/"+id+"/action", data, resultCallback, faultCallback );
         }
 
 
@@ -91,7 +114,7 @@ package
 
         public function updateGroup( id:String, action:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            return doPut( "/groups/" + id + "/action", JSON.stringify( action ), resultCallback, faultCallback );
+            return doGroupRequest( id, JSON.stringify( action ), resultCallback, faultCallback );
         }
 
         public function toggleLight( id:String, isSwitchedOn:Boolean, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
@@ -105,21 +128,21 @@ package
             return doLightRequest( id, data, resultCallback, faultCallback );
         }
 
-        /* private function toggleGroup( groupNr:uint = 0, isSwitchedOn:Boolean = true ):void
+         private function toggleGroup( id:String, isSwitchedOn:Boolean, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
          {
-         var data:String = JSON.stringify (
-         {
-         "on": isSwitchedOn
+             var data:String = JSON.stringify (
+                     {
+                         "on": isSwitchedOn
+                     }
+             );
+
+             return doGroupRequest( id, data, resultCallback, faultCallback );
          }
-         );
-
-         doLightRequest( 1, data );
-         }*/
 
 
-        public function alert( id:String, continuous:Boolean = true, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        public function alert( id:String, isLongSelect:Boolean = false, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            var alertMethod:String = continuous ? "lselect" : "select";
+            var alertMethod:String = isLongSelect ? "lselect" : "select";
 
             var data:String = JSON.stringify (
                     {
@@ -139,7 +162,7 @@ package
 
         public function addSchedule( schedule:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            schedule.command.address = schedule.command.address.split( "{userName}" ).join( HueDelegate.hash );
+            schedule.command.address = schedule.command.address.split( "{userName}" ).join( HueDelegate.userName );
 
             return doPost( "/schedules", JSON.stringify( schedule ), resultCallback, faultCallback );
         }
@@ -163,12 +186,12 @@ package
         }
 
 
-        public function addGroup( name:String, lights:Array, resultCallback:Function = null, faultCallback:Function = null):HueDelegate
+        public function addGroup( name:String, lightIDs:Array, resultCallback:Function = null, faultCallback:Function = null):HueDelegate
         {
             var data:String = JSON.stringify (
                     {
                         "name": name,
-                        "lights": lights
+                        "lights": lightIDs
                     }
             );
 
@@ -183,54 +206,6 @@ package
 
         // ____________________________________________________________________________________________________
         // PRIVATE
-
-        private function init():void
-        {
-
-//            addEventListener( Event.ENTER_FRAME, enterFrameHandler );
-//            getInfo();
-//            addSchedule();
-//            getSchedules();
-//            removeSchedule(1)
-//            toggleLight(false);
-//            getGroup(2);
-//            removeGroup(1);
-//            getGroups();
-//            addGroup();
-
-//            trace(0.25*0xffff);
-//            changeGroup( 0, 0.75, 1, 1, 0 );
-//            changeGroup( 0, 0.25, 1, 0.25, 2 );
-//            addSchedule();
-
-            /*changeLightColor( 0.8, 0.5, 0, 2 );
-            setTimeout(step1, 1000);
-            setTimeout(step2, 1500);*/
-
-        }
-
-        /* private function step1():void
-         {
-         changeLightColor( 0.5, 1, 1, 1 );
-         }
-
-
-         private function step2():void
-         {
-         changeLightColor( Math.random(), 0.5, 0.15, 10 );
-         }*/
-
-
-        private function doRequest( path:String = "", data:String = null, method:String = URLRequestMethod.GET, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
-        {
-            var delegate:HueDelegate = new HueDelegate( path, data, method, [ resultCallback ], [ faultCallback ] );
-            delegate.addEventListener( AsyncDelegateEvent.RESULT, handleDelegateResult );
-            delegate.addEventListener( AsyncDelegateEvent.FAULT, handleDelegateFault );
-            delegate.execute();
-
-            return delegate;
-        }
-
 
         private function doGet( path:String = "", data:String = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -272,6 +247,24 @@ package
         // ____________________________________________________________________________________________________
         // GETTERS / SETTERS
 
+        public function get ipAddress():String
+        {
+            return HueDelegate.ipAddress;
+        }
+        public function set ipAddress( value:String ):void
+        {
+            HueDelegate.ipAddress = value;
+        }
+
+
+        public function get userName():String
+        {
+            return HueDelegate.userName;
+        }
+        public function set userName( value:String ):void
+        {
+            HueDelegate.userName = value;
+        }
 
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS

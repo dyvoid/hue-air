@@ -1,6 +1,8 @@
-package
+package nl.imotion.hue.entities
 {
     import flash.geom.Point;
+
+    import nl.imotion.hue.enums.Alert;
 
 
     /**

@@ -1,4 +1,4 @@
-package
+package nl.imotion.hue.entities
 {
     import mx.formatters.DateFormatter;
 

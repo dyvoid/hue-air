@@ -1,4 +1,4 @@
-package
+package nl.imotion.hue.enums
 {
     /**
      * @author Pieter van de Sluis

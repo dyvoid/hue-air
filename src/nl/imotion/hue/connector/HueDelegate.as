@@ -1,4 +1,4 @@
-package
+package nl.imotion.hue.connector
 {
     import flash.events.Event;
     import flash.events.IOErrorEvent;
@@ -21,11 +21,8 @@ package
 
         private var _loader:URLLoader;
 
-        private static var _hash:String = "c7a514b2b5a681399ecfb86e1265c49c";
-        private static var _appName:String = "HueTest";
-
-        private var _baseURL:String = "http://192.168.1.10/api";
-        private var _appURL:String = _baseURL + "/" + _hash;
+        private static var _ipAddress:String;
+        private static var _userName:String;
 
         private var _method:String;
 
@@ -46,6 +43,12 @@ package
 
         override public function execute():void
         {
+            if ( !_ipAddress )
+                throw new Error( "Hue Bridge IP address is not set" );
+
+            if ( !_userName )
+                throw new Error( "User name is not set" );
+
             super.execute();
 
             addListeners();
@@ -54,11 +57,11 @@ package
 
             if ( operationName == "register" )
             {
-                request = new URLRequest( _baseURL );
+                request = new URLRequest( baseURL );
             }
             else
             {
-                request = new URLRequest( _appURL + operationName );
+                request = new URLRequest( appURL + operationName );
             }
 
             request.data = requestData;
@@ -99,23 +102,35 @@ package
         // ____________________________________________________________________________________________________
         // GETTERS / SETTERS
 
-        public static function get hash():String
+        private function get baseURL():String
         {
-            return _hash;
-        }
-        public static function set hash( value:String ):void
-        {
-            _hash = value;
+            return "http://" + _ipAddress + "/api";
         }
 
 
-        public static function get appName():String
+        private function get appURL():String
         {
-            return _appName;
+            return baseURL + "/" + _userName;
         }
-        public static function set appName( value:String ):void
+
+
+        public static function get userName():String
         {
-            _appName = value;
+            return _userName;
+        }
+        public static function set userName( value:String ):void
+        {
+            _userName = value;
+        }
+
+
+        public static function get ipAddress():String
+        {
+            return _ipAddress;
+        }
+        public static function set ipAddress( value:String ):void
+        {
+            _ipAddress = value;
         }
 
         // ____________________________________________________________________________________________________
@@ -132,6 +147,7 @@ package
             removeListeners();
             onFault( e );
         }
+
 
     }
 }

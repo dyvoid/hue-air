@@ -1,0 +1,406 @@
+<?xml version="1.0"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+               xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:local="*" creationComplete="init()">
+
+    <fx:Script><![CDATA[
+        import com.greensock.TimelineMax;
+        import com.greensock.TweenAlign;
+        import com.greensock.TweenMax;
+        import com.greensock.easing.Expo;
+        import com.greensock.easing.Linear;
+        import com.greensock.easing.Quint;
+
+        import mx.collections.ArrayCollection;
+
+        import nl.imotion.hue.connector.HueConnector;
+        import nl.imotion.hue.entities.HueEntity;
+        import nl.imotion.hue.entities.HueGroup;
+        import nl.imotion.hue.entities.HueLight;
+        import nl.imotion.hue.entities.HueSchedule;
+
+
+        [Bindable]
+        private var _lightsMap:Vector.<HueLight>;
+        [Bindable]
+        private var _groupsMap:Vector.<HueGroup>;
+        [Bindable]
+        private var _entityMap:Vector.<HueEntity>;
+
+        private var _api:HueConnector;
+
+        private var _hash:String = "c7a514b2b5a681399ecfb86e1265c49c";
+        private var _appName:String = "HueTest";
+
+        private var _queue:Vector.<HueEntity>;
+        private var _queueIndex:uint = 0;
+        private var _queueTimer:Timer;
+
+        private var _rateLimit:uint = 25;
+
+        private var _masterBrightness:Number = 1;
+        private var _masterIsOn:Boolean = true;
+
+        private var _lastPoll:Number;
+
+        private var _scheduleUI:ScheduleUI;
+
+
+        private function init():void
+        {
+            _api = new HueConnector( "192.168.1.10", "c7a514b2b5a681399ecfb86e1265c49c" );
+
+            _lightsMap = new Vector.<HueLight>();
+            _groupsMap = new Vector.<HueGroup>();
+            _entityMap = new Vector.<HueEntity>();
+
+//            _api.register( _hash, _appName, onResult );
+
+            _queue = new Vector.<HueEntity>();
+
+            _queueTimer = new Timer( 1000 / _rateLimit );
+            _queueTimer.addEventListener( TimerEvent.TIMER, handleTimerTick );
+
+            _api.getInfo( onGetInfoResult );
+        }
+
+
+        private function startQueue():void
+        {
+            _queueTimer.start();
+        }
+
+
+        private function stopQueue():void
+        {
+            _queueTimer.stop();
+        }
+
+
+        /*private function animate():void
+         {
+         _lightsMap[ 0 ].isOn = true;
+         _lightsMap[ 1 ].isOn = true;
+         _lightsMap[ 2 ].isOn = true;
+         _lightsMap[ 3 ].isOn = true;
+
+         _lightsMap[ 0 ].hue = 0xffff * 0.25;
+         _lightsMap[ 1 ].hue = 0xffff * 0.25;
+         _lightsMap[ 2 ].hue = 0xffff * 0.25;
+         _lightsMap[ 3 ].hue = 0xffff * 0.25;
+
+         //            _lightsMap[ 0 ].hue = 0xffff * 0.75;
+         *//*TweenMax.fromTo( _lightsMap[ 0 ], 1, { brightness:0, saturation: 0xfe, ease: Expo.easeOut }, { brightness:0xfe, saturation: 0x00, repeat: -1, yoyo: true } );
+         TweenMax.fromTo( _lightsMap[ 1 ], 1, { brightness:0, saturation: 0xfe, ease: Expo.easeOut }, { brightness:0xfe, saturation: 0x00, repeat: -1, yoyo: true } );
+         TweenMax.fromTo( _lightsMap[ 2 ], 1, { brightness:0, saturation: 0xfe, ease: Expo.easeOut }, { brightness:0xfe, saturation: 0x00, repeat: -1, yoyo: true } );
+         TweenMax.fromTo( _lightsMap[ 3 ], 1, { brightness:0, saturation: 0xfe, ease: Expo.easeOut }, { brightness:0xfe, saturation: 0x00, repeat: -1, yoyo: true } );*//*
+
+         var arr:Array = [];
+         _lightsMap.forEach(arrayConverter);
+         function arrayConverter(item:HueEntity, index:int, vector:Vector.<HueEntity>):void
+         {
+         arr[arr.length] = item;
+         }
+
+         new TimelineMax( { tweens: [
+         new TimelineMax( { tweens:
+         TweenMax.allFromTo( arr, 1, { brightness:0, saturation: 0xfe, ease: Expo.easeOut }, { brightness:0xfe, saturation: 0x00 } )
+         }),
+         new TimelineMax( { tweens:
+         TweenMax.allTo( arr, 0.25, { brightness:0x88, saturation: 0xaa, ease: Expo.easeIn } )
+         })
+         ], align: TweenAlign.SEQUENCE
+         });
+
+         *//*new TimelineMax( { tweens: [
+         TweenMax.fromTo( _lightsMap[ 0 ], 3, { brightness:0, saturation: 0xfe, ease: Expo.easeOut }, { brightness:0xfe, saturation: 0x00 } ),
+         TweenMax.to( _lightsMap[ 0 ], 1, { brightness:0x88, saturation: 0xaa, ease: Expo.easeOut } )
+         ], align: TweenAlign.SEQUENCE
+         } );*//*
+         }*/
+
+        /*private function animate():void
+         {
+         new TimelineMax( { tweens:[
+         TweenMax.to( this, 3, { masterBrightness:0.25, ease:Linear.easeNone } ),
+         TweenMax.to( this, 3, { masterBrightness:1, ease:Quint.easeIn } )
+         ], align:TweenAlign.SEQUENCE, repeat:-1
+         } );
+         }*/
+
+
+        /*private function animate():void
+         {
+         _lightsMap[ 0 ].brightness = 0xfe;
+         _lightsMap[ 1 ].brightness = 0xfe;
+         _lightsMap[ 2 ].brightness = 0xfe;
+         _lightsMap[ 3 ].brightness = 0xfe;
+
+         _lightsMap[ 0 ].saturation = 0;
+         _lightsMap[ 1 ].saturation = 0;
+         _lightsMap[ 2 ].saturation = 0;
+         _lightsMap[ 3 ].saturation = 0;
+
+         var arr:Array = [];
+         _lightsMap.forEach(arrayConverter);
+         function arrayConverter(item:HueEntity, index:int, vector:Vector.<HueLight>):void
+         {
+         arr[arr.length] = item;
+         }
+
+         new TimelineMax( { tweens: [
+         new TimelineMax( { tweens:
+         TweenMax.allTo( arr, 0, { brightness: 0xfe } )
+         }),
+         new TimelineMax( { tweens:
+         TweenMax.allTo( arr, 0, { brightness: 0 } )
+         })
+         ], align: TweenAlign.SEQUENCE, repeat: -1, delay: 0.5
+         });
+         }*/
+
+
+        /*private function animate():void
+         {
+         _groupsMap[ 0 ].isOn = true;
+         _groupsMap[ 0 ].hue = 0xffff * 0.25;
+
+         new TimelineMax( { tweens: [
+         TweenMax.fromTo( _groupsMap[ 0 ], 3, { brightness:0, saturation: 0xfe, ease: Expo.easeOut }, { brightness:0xfe, saturation: 0x00 } ),
+         TweenMax.to( _groupsMap[ 0 ], 1, { brightness:0x88, saturation: 0xaa, ease: Expo.easeOut } )
+         ], align: TweenAlign.SEQUENCE
+         } );
+         }*/
+
+
+        private function processQueue():void
+        {
+            for each ( var entity:HueEntity in _entityMap )
+            {
+                var queuePosition:int = _queue.indexOf( entity );
+
+                if ( entity.isInvalid )
+                {
+                    if ( queuePosition == -1 )
+                    {
+                        _queue.push( entity );
+                    }
+                }
+                else
+                {
+                    if ( queuePosition != -1 )
+                    {
+                        _queue.splice( queuePosition, 1 );
+
+                        if ( _queueIndex >= queuePosition && _queueIndex > 1 )
+                        {
+                            _queueIndex--;
+                        }
+                    }
+                }
+            }
+
+            if ( _queue.length != 0 )
+            {
+                if ( _queueIndex >= _queue.length )
+                {
+                    _queueIndex = 0;
+                }
+
+                entity = _queue[ _queueIndex ];
+                var brightness:uint = Math.round( entity.brightness * _masterBrightness );
+                var isOn:Boolean = ( _masterIsOn ) ? entity.isOn : false;
+                var transitionTime:Number = Math.round( ( _queueTimer.delay * _queue.length ) / 100 ) + 1;
+
+                if ( entity is HueLight )
+                {
+                    var state:Object = entity.toStateObject();
+                    state.transitiontime = transitionTime;
+                    state.bri = Math.round( entity.brightness * _masterBrightness );
+                    state.on = _masterIsOn ? entity.isOn : false;
+                    _api.updateLight( entity.id, state, onResult );
+                }
+                else
+                {
+                    var action:Object = entity.toStateObject();
+                    action.transitiontime = transitionTime;
+                    action.bri = Math.round( entity.brightness * _masterBrightness );
+                    action.on = _masterIsOn ? entity.isOn : false;
+                    _api.updateGroup( entity.id, action, onResult );
+                }
+
+                entity.isInvalid = false;
+
+                _queueIndex = ( _queueIndex + 1 ) % _queue.length;
+            }
+        }
+
+
+        private function onResult( data:String ):void
+        {
+            trace( data );
+        }
+
+
+        private function onGetInfoResult( data:String ):void
+        {
+            trace( data );
+            var result:Object = JSON.parse( data );
+
+            var key:String;
+
+            var lights:Object = result.lights;
+            for ( key in lights )
+            {
+                var light:HueLight = new HueLight( key, lights[ key ] );
+
+                _lightsMap.push( light );
+                _entityMap.push( light );
+
+                var entityUI:EntityUI = new EntityUI();
+                entityUI.entity = light;
+                entityUI.width = 200;
+                uiContainer.addElement( entityUI );
+            }
+
+            // Add default group
+            var group:HueGroup = new HueGroup( "0" );
+            group.name = "All lights";
+            group.isInvalid = false;
+            for each ( light in _lightsMap )
+            {
+                group.addLight( light );
+            }
+            _groupsMap.push( group );
+            _entityMap.push( group );
+
+            var groups:Object = result.groups;
+            for ( key in groups )
+            {
+                group = new HueGroup( key, groups[ key ] );
+
+                for ( var i:int = 0; i < groups[ key ].lights.length; i++ )
+                {
+                    group.addLight( getLightByID( groups[ key ].lights[ i ] ) );
+                }
+
+                _groupsMap.push( group );
+                _entityMap.push( group );
+            }
+
+            var lightsArray:Array = [];
+            _lightsMap.forEach( lightsArrayConverter );
+            function lightsArrayConverter( item:HueEntity, index:int, vector:Vector.<HueLight> ):void
+            {
+                lightsArray[ lightsArray.length ] = item;
+            }
+
+
+            var groupsArray:Array = [];
+            _groupsMap.forEach( groupsArrayConverter );
+            function groupsArrayConverter( item:HueEntity, index:int, vector:Vector.<HueGroup> ):void
+            {
+                groupsArray[ groupsArray.length ] = item;
+            }
+
+
+            _scheduleUI = new ScheduleUI();
+            _scheduleUI.lights = new ArrayCollection( lightsArray );
+            _scheduleUI.groups = new ArrayCollection( groupsArray );
+            _scheduleUI.addEventListener( Event.COMPLETE, handleScheduleSubmit );
+            scheduleContainer.addElement( _scheduleUI );
+
+            startQueue();
+        }
+
+
+        private function handleScheduleSubmit( e:Event ):void
+        {
+            var schedule:HueSchedule = _scheduleUI.schedule;
+
+            _api.addSchedule( schedule.toObject(), onResult );
+        }
+
+
+        private function handleTimerTick( e:TimerEvent ):void
+        {
+            processQueue();
+        }
+
+
+        private function invalidateAllLights():void
+        {
+            for each ( var light:HueEntity in _lightsMap )
+            {
+                light.isInvalid = true;
+            }
+        }
+
+
+        private function getLightByID( id:String ):HueLight
+        {
+            for each ( var light:HueLight in _lightsMap )
+            {
+                if ( light.id == id )
+                    return light;
+            }
+
+            return null;
+        }
+
+
+        private function getGroupByID( id:String ):HueGroup
+        {
+            for each ( var group:HueGroup in _groupsMap )
+            {
+                if ( group.id == id )
+                    return group;
+            }
+
+            return null;
+        }
+
+
+        [Bindable]
+        public function get masterBrightness():Number
+        {
+            return _masterBrightness;
+        }
+
+
+        public function set masterBrightness( value:Number ):void
+        {
+            if ( _masterBrightness == value ) return;
+
+            _masterBrightness = value;
+            invalidateAllLights();
+        }
+
+
+        [Bindable]
+        public function get masterIsOn():Boolean
+        {
+            return _masterIsOn;
+        }
+
+
+        public function set masterIsOn( value:Boolean ):void
+        {
+            if ( _masterBrightness == value ) return;
+
+            _masterIsOn = value;
+            invalidateAllLights();
+        }
+        ]]></fx:Script>
+
+    <s:VGroup paddingTop="20" paddingRight="20" paddingLeft="20" paddingBottom="20" gap="30" >
+        <s:HGroup id="uiContainer" gap="30" />
+
+        <s:HGroup width="100%">
+            <s:CheckBox id="cbMasterIsOn" selected="@{masterIsOn}" label="Master" fontWeight="bold" />
+            <s:HSlider minimum="0" maximum="1" width="100%" value="@{masterBrightness}" stepSize="0.01"  />
+        </s:HGroup>
+
+        <s:Group id="scheduleContainer" />
+    </s:VGroup>
+
+</s:Application>

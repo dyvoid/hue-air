@@ -1,6 +1,9 @@
-package
+package nl.imotion.hue.entities
 {
     import flash.geom.Point;
+
+    import nl.imotion.hue.enums.ColorMode;
+    import nl.imotion.hue.enums.Effect;
 
     import nl.imotion.utils.range.Range;
 
