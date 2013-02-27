@@ -58,10 +58,9 @@
         private var _appName:String = "HueTest";
 
         private var _queue:Vector.<HueEntity>;
-        private var _queueIndex:uint = 0;
         private var _queueTimer:Timer;
 
-        private var _rateLimit:uint = 25;
+        private var _rateLimit:uint = 20;
 
         private var _masterBrightness:Number = 1;
         private var _masterIsOn:Boolean = true;
@@ -185,7 +184,7 @@
          }*/
 
 
-        /*private function animate():void
+       /* private function animate():void
          {
          _groupsMap[ 0 ].isOn = true;
          _groupsMap[ 0 ].hue = 0xffff * 0.25;
@@ -196,6 +195,42 @@
          ], align: TweenAlign.SEQUENCE
          } );
          }*/
+
+
+        /*private function animate():void
+        {
+            var lightsArray:Array = [];
+            _lightsMap.forEach( lightsArrayConverter );
+            function lightsArrayConverter( item:HueEntity, index:int, vector:Vector.<HueLight> ):void
+            {
+                lightsArray[ lightsArray.length ] = item;
+            }
+
+            for ( var j:int = 0; j < lightsArray.length; j++ )
+            {
+                var hueLight:HueLight = lightsArray[j];
+
+                hueLight.isOn = true;
+                hueLight.hue = 0xffff * 0.25;
+            }
+
+            new TimelineMax( { tweens: [
+                new TimelineMax( { tweens:
+                    TweenMax.allFromTo( lightsArray, 2, { brightness:0, saturation: 0xfe, ease: Expo.easeOut }, { brightness:0xfe, saturation: 0x00 } )
+                    , align: TweenAlign.NORMAL}  ),
+                new TimelineMax( { tweens:
+                TweenMax.allTo( lightsArray, 1, { brightness:0x88, saturation: 0xaa, ease: Expo.easeOut } )
+                    , align: TweenAlign.NORMAL} )
+            ], align: TweenAlign.SEQUENCE
+            } );
+
+           *//* new TimelineMax( { tweens: [
+                TweenMax.fromTo( _groupsMap[0], 2, { brightness:0, saturation: 0xfe, ease: Expo.easeOut }, { brightness:0xfe, saturation: 0x00 } ),
+                TweenMax.to( _groupsMap[0], 1, { brightness:0x88, saturation: 0xaa, ease: Expo.easeOut } )
+            ], align: TweenAlign.SEQUENCE
+            } );*//*
+        }*/
+
 
 
         private function processQueue():void
@@ -224,42 +259,30 @@
                     if ( queuePosition != -1 )
                     {
                         _queue.splice( queuePosition, 1 );
-
-                        if ( _queueIndex >= queuePosition && _queueIndex > 1 )
-                        {
-                            _queueIndex--;
-                        }
                     }
                 }
             }
 
             if ( _queue.length != 0 )
             {
-                if ( _queueIndex >= _queue.length )
-                {
-                    _queueIndex = 0;
-                }
-
-                entity = _queue[ _queueIndex ];
-                var brightness:uint = Math.round( entity.brightness * _masterBrightness );
-                var isOn:Boolean = ( _masterIsOn ) ? entity.isOn : false;
-                var transitionTime:Number = Math.round( ( _queueTimer.delay * _queue.length ) / 100 ) + 1;
+                entity = _queue[ 0 ];
 
                 var update:Object = entity.flushUpdateObject();
-                update.transitiontime = transitionTime;
                 update.bri = Math.round( entity.brightness * _masterBrightness );
                 update.on = _masterIsOn ? entity.isOn : false;
 
                 if ( entity is HueLight )
                 {
+                    update.transitiontime = Math.round( ( _queueTimer.delay * _queue.length ) / 100 ) + 1;
                     _api.updateLight( entity.id, update, onResult );
                 }
                 else
                 {
+                    update.transitiontime = Math.round( ( _queueTimer.delay * ( _queue.length + HueGroup( entity ).lights.length ) ) / 100 ) + 1;
                     _api.updateGroup( entity.id, update, onResult );
                 }
 
-                _queueIndex = ( _queueIndex + 1 ) % _queue.length;
+                _queue.shift();
             }
         }
 
