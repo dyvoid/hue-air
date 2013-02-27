@@ -39,10 +39,7 @@ package nl.imotion.hue.entities
         // ____________________________________________________________________________________________________
         // PROPERTIES
 
-        private var _alert          :String;
-
         private var _reachable      :Boolean;
-
         private var _type           :String;
         private var _modelID        :String;
         private var _swVersion      :String;
@@ -64,41 +61,29 @@ package nl.imotion.hue.entities
         // ____________________________________________________________________________________________________
         // PUBLIC
 
-        public function fromObject( propsObject:Object ):void
+        override public function fromObject( propsObject:Object ):void
         {
             try
             {
+                super.fromObject( propsObject );
                 basePropsFromObject( propsObject.state );
-                _alert = propsObject.state.alert;
                 _reachable = propsObject.state.reachable;
                 _type = propsObject.type;
-                name = propsObject.name;
                 _modelID = propsObject.modelid;
                 _swVersion = propsObject.swversion;
                 _pointSymbol = propsObject.pointsymbol;
-
-                isInvalid = false;
             }
             catch ( e:Error )
             {
-                throw new Error( "Properties object is invalid" );
+                throw new Error( HueEntity.ERROR_INVALID_OBJECT );
             }
-        }
-
-
-        override public function toStateObject():Object
-        {
-            var obj:Object = super.toStateObject();
-            obj.alert = _alert;
-
-            return obj;
         }
 
 
         public function alert( isLongSelect:Boolean = false ):void
         {
-            _alert = isLongSelect ? Alert.LONG_SELECT : Alert.SELECT;
-            isInvalid = true;
+            var alert:String = isLongSelect ? Alert.LONG_SELECT : Alert.SELECT;
+            addToUpdate( { alert: alert } );
         }
 
         // ____________________________________________________________________________________________________
@@ -111,12 +96,6 @@ package nl.imotion.hue.entities
 
         // ____________________________________________________________________________________________________
         // GETTERS / SETTERS
-
-        public function get alertState():String
-        {
-            return _alert;
-        }
-
 
         public function get reachable():Boolean
         {
@@ -145,18 +124,6 @@ package nl.imotion.hue.entities
         public function get pointSymbol():Object
         {
             return _pointSymbol;
-        }
-
-
-        override public function set isInvalid( value:Boolean ):void
-        {
-            super.isInvalid = value;
-
-            // Reset alert state, otherwise we will send it with every invalidation
-            if ( !value )
-            {
-                _alert = Alert.NONE;
-            }
         }
 
         // ____________________________________________________________________________________________________

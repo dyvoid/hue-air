@@ -59,18 +59,16 @@ package nl.imotion.hue.entities
         // ____________________________________________________________________________________________________
         // PUBLIC
 
-        public function fromObject( propsObject:Object ):void
+        override public function fromObject( propsObject:Object ):void
         {
             try
             {
+                super.fromObject( propsObject );
                 basePropsFromObject( propsObject.action );
-                name = propsObject.name;
-
-                isInvalid = false;
             }
             catch ( e:Error )
             {
-                throw new Error( "Properties object is invalid" );
+                throw new Error( HueEntity.ERROR_INVALID_OBJECT );
             }
         }
 

@@ -200,11 +200,19 @@
 
         private function processQueue():void
         {
-            for each ( var entity:HueEntity in _entityMap )
+            var entityMapLength:uint = _entityMap.length;
+            var entityMapClone:Vector.<HueEntity> = _entityMap.concat();
+
+            for ( var i:int = 0; i < entityMapLength; i++ )
             {
+                var rndIndex:uint = Math.floor( Math.random() * entityMapClone.length );
+
+                var entity:HueEntity = entityMapClone[ rndIndex ];
+                entityMapClone.splice( rndIndex, 1 );
+
                 var queuePosition:int = _queue.indexOf( entity );
 
-                if ( entity.isInvalid )
+                if ( entity.hasUpdate() )
                 {
                     if ( queuePosition == -1 )
                     {
@@ -237,24 +245,19 @@
                 var isOn:Boolean = ( _masterIsOn ) ? entity.isOn : false;
                 var transitionTime:Number = Math.round( ( _queueTimer.delay * _queue.length ) / 100 ) + 1;
 
+                var update:Object = entity.flushUpdateObject();
+                update.transitiontime = transitionTime;
+                update.bri = Math.round( entity.brightness * _masterBrightness );
+                update.on = _masterIsOn ? entity.isOn : false;
+
                 if ( entity is HueLight )
                 {
-                    var state:Object = entity.toStateObject();
-                    state.transitiontime = transitionTime;
-                    state.bri = Math.round( entity.brightness * _masterBrightness );
-                    state.on = _masterIsOn ? entity.isOn : false;
-                    _api.updateLight( entity.id, state, onResult );
+                    _api.updateLight( entity.id, update, onResult );
                 }
                 else
                 {
-                    var action:Object = entity.toStateObject();
-                    action.transitiontime = transitionTime;
-                    action.bri = Math.round( entity.brightness * _masterBrightness );
-                    action.on = _masterIsOn ? entity.isOn : false;
-                    _api.updateGroup( entity.id, action, onResult );
+                    _api.updateGroup( entity.id, update, onResult );
                 }
-
-                entity.isInvalid = false;
 
                 _queueIndex = ( _queueIndex + 1 ) % _queue.length;
             }
@@ -291,7 +294,6 @@
             // Add default group
             var group:HueGroup = new HueGroup( "0" );
             group.name = "All lights";
-            group.isInvalid = false;
             for each ( light in _lightsMap )
             {
                 group.addLight( light );
@@ -320,14 +322,12 @@
                 lightsArray[ lightsArray.length ] = item;
             }
 
-
             var groupsArray:Array = [];
             _groupsMap.forEach( groupsArrayConverter );
             function groupsArrayConverter( item:HueEntity, index:int, vector:Vector.<HueGroup> ):void
             {
                 groupsArray[ groupsArray.length ] = item;
             }
-
 
             _scheduleUI = new ScheduleUI();
             _scheduleUI.lights = new ArrayCollection( lightsArray );
@@ -357,7 +357,7 @@
         {
             for each ( var light:HueEntity in _lightsMap )
             {
-                light.isInvalid = true;
+                light.invalidate();
             }
         }
 

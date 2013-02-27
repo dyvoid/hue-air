@@ -42,6 +42,8 @@ package nl.imotion.hue.entities
         // ____________________________________________________________________________________________________
         // PROPERTIES
 
+        protected static const ERROR_INVALID_OBJECT:String = "Properties object is invalid";
+
         private var _isOn:Boolean;
 
         private var _id:String;
@@ -64,7 +66,7 @@ package nl.imotion.hue.entities
         private var _saturationRange:Range = new Range( 0x00, 0xfe );
         private var _colorTemperatureRange:Range = new Range( 154, 500 );
 
-        private var _isInvalid:Boolean = false;
+        private var _updateObject:Object;
 
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
@@ -80,35 +82,70 @@ package nl.imotion.hue.entities
         // ____________________________________________________________________________________________________
         // PUBLIC
 
+        public function fromObject( propsObject:Object ):void
+        {
+            try
+            {
+                _name = propsObject.name;
+            }
+            catch ( e:Error )
+            {
+                throw new Error( ERROR_INVALID_OBJECT  );
+            }
+        }
+
         public function toStateObject():Object
         {
             var obj:Object =
             {
-                "bri": brightness,
-                "on": isOn
+                "bri": _brightness,
+                "on": _isOn
             };
 
-            switch ( colorMode )
+            switch ( _colorMode )
             {
                 case ColorMode.HUE_SATURATION:
-                    obj.hue = hue;
-                    obj.sat = saturation;
+                    obj.hue = _hue;
+                    obj.sat = _saturation;
                     break;
 
                 case ColorMode.COLOR_TEMPERATURE:
-                    obj.ct = colorTemperature;
+                    obj.ct = _colorTemperature;
                     break;
 
                 case ColorMode.XY:
-                    obj.xy = [ xy.x, xy.y ];
+                    obj.xy = [ _xy.x, _xy.y ];
                     break;
             }
 
             return obj;
         }
 
+
+        public function hasUpdate():Boolean
+        {
+            return ( _updateObject != null );
+        }
+
+
+        public function flushUpdateObject():Object
+        {
+            var tempObject:Object = _updateObject;
+
+            _updateObject = null;
+
+            return tempObject;
+        }
+
+
+        public function invalidate():void
+        {
+            _updateObject = toStateObject();
+        }
+
         // ____________________________________________________________________________________________________
         // PRIVATE
+
 
 
         // ____________________________________________________________________________________________________
@@ -116,15 +153,30 @@ package nl.imotion.hue.entities
 
         protected function basePropsFromObject( basePropsObject:Object ):void
         {
-            isOn = basePropsObject.on;
-            hue = basePropsObject.hue;
-            brightness = basePropsObject.bri;
-            saturation = basePropsObject.sat;
-            xy = new Point( basePropsObject.xy[0], basePropsObject.xy[1] );
-            colorTemperature = basePropsObject.ct;
-            effect = basePropsObject.effect;
-            colorMode = basePropsObject.colormode;
-            isInvalid = false;
+            _isOn = basePropsObject.on;
+            _hue = basePropsObject.hue;
+            _brightness = basePropsObject.bri;
+            _saturation = basePropsObject.sat;
+            _xy = new Point( basePropsObject.xy[0], basePropsObject.xy[1] );
+            _colorTemperature = basePropsObject.ct;
+            _effect = basePropsObject.effect;
+            _colorMode = basePropsObject.colormode;
+        }
+
+
+        protected function addToUpdate( newObject:Object ):void
+        {
+            if ( !_updateObject )
+            {
+                _updateObject = newObject;
+            }
+            else
+            {
+                for ( var key:String in newObject )
+                {
+                    _updateObject[ key ] = newObject[ key ];
+                }
+            }
         }
 
         // ____________________________________________________________________________________________________
@@ -147,10 +199,9 @@ package nl.imotion.hue.entities
         }
         public function set name( value:String ):void
         {
-            if ( _name == value ) return;
-
             _name = value;
         }
+
 
         [Bindable]
         public function get isOn():Boolean
@@ -162,18 +213,9 @@ package nl.imotion.hue.entities
             if ( _isOn == value ) return;
 
             _isOn = value;
-            _isInvalid = true;
+            addToUpdate( { on: _isOn } );
         }
 
-        [Bindable]
-        public function get isInvalid():Boolean
-        {
-            return _isInvalid;
-        }
-        public function set isInvalid( value:Boolean ):void
-        {
-            _isInvalid = value;
-        }
 
         [Bindable]
         public function get hue():uint
@@ -186,7 +228,7 @@ package nl.imotion.hue.entities
 
             _hue = _hueRange.constrain( value );
             _colorMode = ColorMode.HUE_SATURATION;
-            _isInvalid = true;
+            addToUpdate( { hue: _hue } );
         }
 
         [Bindable]
@@ -199,7 +241,7 @@ package nl.imotion.hue.entities
             if ( _brightness == value ) return;
 
             _brightness = _brightnessRange.constrain( value );
-            _isInvalid = true;
+            addToUpdate( { bri: _brightness } );
         }
 
         [Bindable]
@@ -213,7 +255,7 @@ package nl.imotion.hue.entities
 
             _saturation = _saturationRange.constrain( value );
             _colorMode = ColorMode.HUE_SATURATION;
-            _isInvalid = true;
+            addToUpdate( { sat: _saturation } );
         }
 
         [Bindable]
@@ -227,7 +269,7 @@ package nl.imotion.hue.entities
 
             _xy = value;
             _colorMode = ColorMode.XY;
-            _isInvalid = true;
+            addToUpdate( { xy: [ _xy.x, _xy.y ] } );
         }
 
         [Bindable]
@@ -241,7 +283,7 @@ package nl.imotion.hue.entities
 
             _colorTemperature = _colorTemperatureRange.constrain( value );
             _colorMode = ColorMode.COLOR_TEMPERATURE;
-            _isInvalid = true;
+            addToUpdate( { ct: _colorTemperature } );
         }
 
         [Bindable]
@@ -254,20 +296,12 @@ package nl.imotion.hue.entities
             if ( _effect == value || Effect.getAll().indexOf( value ) == -1 ) return;
 
             _effect = value;
-            _isInvalid = true;
+            addToUpdate( { effect: _effect } );
         }
 
-        [Bindable]
         public function get colorMode():String
         {
             return _colorMode;
-        }
-        public function set colorMode( value:String ):void
-        {
-            if ( _colorMode == value || ColorMode.getAll().indexOf( value ) == -1 ) return;
-
-            _colorMode = value;
-            _isInvalid = true;
         }
 
 
@@ -294,9 +328,14 @@ package nl.imotion.hue.entities
             return _colorTemperatureRange;
         }
 
+
+        public function get updateObject():Object
+        {
+            return _updateObject;
+        }
+
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS
-
 
     }
 }
