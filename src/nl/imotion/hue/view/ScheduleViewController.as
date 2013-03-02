@@ -27,8 +27,11 @@
 package nl.imotion.hue.view
 {
     import flash.display.DisplayObject;
+    import flash.events.Event;
 
     import nl.imotion.bindmvc.controller.BindController;
+    import nl.imotion.hue.entities.HueSchedule;
+    import nl.imotion.hue.model.HueModel;
 
 
     /**
@@ -46,6 +49,8 @@ package nl.imotion.hue.view
         public function ScheduleViewController( viewComponent:DisplayObject )
         {
             super( viewComponent );
+
+            init();
         }
 
         // ____________________________________________________________________________________________________
@@ -55,6 +60,10 @@ package nl.imotion.hue.view
         // ____________________________________________________________________________________________________
         // PRIVATE
 
+        private function init():void
+        {
+            startEventInterest( defaultView, Event.COMPLETE, onFormSubmit )
+        }
 
         // ____________________________________________________________________________________________________
         // PROTECTED
@@ -63,10 +72,24 @@ package nl.imotion.hue.view
         // ____________________________________________________________________________________________________
         // GETTERS / SETTERS
 
+        private function get model():HueModel
+        {
+            return retrieveModel( HueModel.NAME ) as HueModel;
+        }
+
+
+        private function get view():ScheduleView
+        {
+            return defaultView as ScheduleView;
+        }
 
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS
 
+        private function onFormSubmit():void
+        {
+            model.addSchedule( view.schedule );
+        }
 
     }
 }

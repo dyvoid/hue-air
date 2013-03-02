@@ -34,6 +34,7 @@ package nl.imotion.hue.model
     import nl.imotion.hue.entities.HueEntity;
     import nl.imotion.hue.entities.HueGroup;
     import nl.imotion.hue.entities.HueLight;
+    import nl.imotion.hue.entities.HueSchedule;
     import nl.imotion.hue.notes.ModelReadyNote;
 
 
@@ -102,6 +103,12 @@ package nl.imotion.hue.model
         public function register( userName:String, deviceType:String, onResult:Function, onFault:Function ):void
         {
             _connector.register( userName, deviceType, onResult, onFault );
+        }
+
+
+        public function addSchedule( schedule:HueSchedule ):void
+        {
+            _connector.addSchedule( schedule.toObject(), onResult );
         }
 
         // ____________________________________________________________________________________________________

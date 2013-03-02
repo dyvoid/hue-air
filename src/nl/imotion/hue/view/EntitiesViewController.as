@@ -26,12 +26,10 @@
 
 package nl.imotion.hue.view
 {
-    import mx.collections.ArrayCollection;
     import mx.core.UIComponent;
 
     import nl.imotion.bindmvc.controller.BindController;
     import nl.imotion.hue.entities.HueGroup;
-    import nl.imotion.hue.entities.HueLight;
     import nl.imotion.hue.model.HueModel;
     import nl.imotion.hue.notes.ModelReadyNote;
     import nl.imotion.hue.util.VectorConverter;
