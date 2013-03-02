@@ -32,6 +32,7 @@ package nl.imotion.hue.view
     import nl.imotion.bindmvc.controller.BindController;
     import nl.imotion.hue.entities.HueSchedule;
     import nl.imotion.hue.model.HueModel;
+    import nl.imotion.hue.util.VectorConverter;
 
 
     /**
@@ -62,7 +63,10 @@ package nl.imotion.hue.view
 
         private function init():void
         {
-            startEventInterest( defaultView, Event.COMPLETE, onFormSubmit )
+            startEventInterest( defaultView, Event.COMPLETE, onFormSubmit );
+
+            view.lights = VectorConverter.toArrayCollection( model.lightsMap );
+            view.groups = VectorConverter.toArrayCollection( model.groupsMap );
         }
 
         // ____________________________________________________________________________________________________
@@ -86,7 +90,7 @@ package nl.imotion.hue.view
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS
 
-        private function onFormSubmit():void
+        private function onFormSubmit( e:Event ):void
         {
             model.addSchedule( view.schedule );
         }
