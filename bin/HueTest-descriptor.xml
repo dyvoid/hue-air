@@ -9,11 +9,11 @@
 <application xmlns="http://ns.adobe.com/air/application/3.1">
   <!-- A universally unique application identifier. Must be unique across all AIR applications.
          Using a reverse DNS-style name as the id is recommended. (Eg. com.example.ExampleApplication.) Required. -->
-  <id>Application</id>
+  <id>nl.imotion.hue.view.Main</id>
   <!-- Used as the filename for the application. Required. -->
-  <filename>Application</filename>
+  <filename>Main</filename>
   <!-- The name that is displayed in the AIR application installer. May have multiple values for each language. See samples or xsd schema file. Optional. -->
-  <name>Application</name>
+  <name>Main</name>
   <!-- A string value of the format <0-999>.<0-999>.<0-999> that represents application version which can be used to check for application upgrade.
          Values can also be 1-part or 2-part. It is not necessary to have a 3-part value.
          An updated version of application must have a versionNumber value higher than the previous version. Required for namespace >= 2.5. -->
@@ -53,7 +53,7 @@
     <!-- The window's initial width in pixels. Optional. -->
     <width>1000</width>
     <!-- The window's initial height in pixels. Optional. -->
-    <height>800</height>
+    <height>600</height>
     <!-- The window's initial x position. Optional. -->
     <!--<x></x>-->
     <!-- The window's initial y position. Optional. -->

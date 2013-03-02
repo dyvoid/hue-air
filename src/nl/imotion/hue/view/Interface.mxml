@@ -36,15 +36,14 @@
 
     <s:TabBar dataProvider="{viewStack}" />
 
-    <mx:ViewStack id="viewStack" width="100%" height="100%" >
-        <s:NavigatorContent id="lights" label="Lights">
-            <ui:EntitiesView id="lightsView" width="100%" />
+    <mx:ViewStack id="viewStack" width="100%" height="100%">
+        <s:NavigatorContent id="lights" label="Lights" width="100%">
+            <s:Scroller width="100%" height="100%">
+                <ui:EntitiesView width="100%" />
+            </s:Scroller>
         </s:NavigatorContent>
-        <s:NavigatorContent id="groups" label="Groups">
-            <ui:EntitiesView id="groupsView" width="100%" />
-        </s:NavigatorContent>
-        <s:NavigatorContent id="schedules" label="Schedules">
-            <ui:ScheduleView />
+        <s:NavigatorContent id="schedules" label="Schedules" width="100%">
+            <ui:ScheduleView width="100%" />
         </s:NavigatorContent>
     </mx:ViewStack>
 

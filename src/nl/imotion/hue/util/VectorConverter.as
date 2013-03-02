@@ -24,23 +24,15 @@
  * http://code.google.com/p/imotionproductions/
  */
 
-package nl.imotion.hue.view
+package nl.imotion.hue.util
 {
     import mx.collections.ArrayCollection;
-    import mx.core.UIComponent;
-
-    import nl.imotion.bindmvc.controller.BindController;
-    import nl.imotion.hue.entities.HueGroup;
-    import nl.imotion.hue.entities.HueLight;
-    import nl.imotion.hue.model.HueModel;
-    import nl.imotion.hue.notes.ModelReadyNote;
-    import nl.imotion.hue.util.VectorConverter;
 
 
     /**
      * @author Pieter van de Sluis
      */
-    public class EntitiesViewController extends BindController
+    public class VectorConverter
     {
         // ____________________________________________________________________________________________________
         // PROPERTIES
@@ -49,37 +41,33 @@ package nl.imotion.hue.view
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
-        public function EntitiesViewController( viewComponent:UIComponent )
-        {
-            super( viewComponent );
-
-            init();
-        }
 
         // ____________________________________________________________________________________________________
         // PUBLIC
 
+        public static function toArray( vector:* ):Array
+        {
+            var arr:Array = [];
+
+            vector.forEach(
+                function vectorConverter( item:*, index:int, vector:* ):void
+                {
+                    arr[ arr.length ] = item;
+                }
+            );
+
+            return arr;
+        }
+
+        public static function toArrayCollection( vector:* ):ArrayCollection
+        {
+            return new ArrayCollection( toArray( vector ) );
+
+        }
 
         // ____________________________________________________________________________________________________
         // PRIVATE
 
-        private function init():void
-        {
-            if ( !model.isReady )
-            {
-                this.startNoteInterest( ModelReadyNote.MODEL_READY, onModelReady );
-            }
-            else
-            {
-                start( model.groupsMap );
-            }
-        }
-
-
-        private function start( groupsMap:Vector.<HueGroup> ):void
-        {
-            view.groupsCollection = VectorConverter.toArrayCollection( groupsMap );
-        }
 
         // ____________________________________________________________________________________________________
         // PROTECTED
@@ -88,26 +76,10 @@ package nl.imotion.hue.view
         // ____________________________________________________________________________________________________
         // GETTERS / SETTERS
 
-        private function get model():HueModel
-        {
-            return retrieveModel( HueModel.NAME ) as HueModel;
-        }
-
-
-        private function get view():EntitiesView
-        {
-            return defaultView as EntitiesView;
-        }
 
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS
 
-        private function onModelReady( n:ModelReadyNote ):void
-        {
-            this.stopNoteInterest( ModelReadyNote.MODEL_READY, onModelReady );
-
-            start( n.groupsMap );
-        }
 
     }
 }

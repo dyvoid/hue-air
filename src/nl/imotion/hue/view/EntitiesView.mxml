@@ -26,24 +26,37 @@
   -->
 
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-    xmlns:mx="library://ns.adobe.com/flex/mx">
+    xmlns:mx="library://ns.adobe.com/flex/mx" width="100%">
 
     <fx:Script><![CDATA[
         import mx.collections.ArrayCollection;
 
+
         [Bindable]
-        private var _entities:ArrayCollection;
+        private var _groupsCollection:ArrayCollection;
+
+        private var _isInited:Boolean = false;
 
 
-        public function set entities( entities:ArrayCollection ):void
+        public function set groupsCollection( value:ArrayCollection ):void
         {
-            _entities = entities;
+            _groupsCollection = value;
+        }
+
+
+        private function init():void
+        {
+            if ( !_isInited && dataGroup.numElements != 0 )
+            {
+                GroupView( dataGroup.getElementAt( 0 ) ).currentState = "expanded";
+                _isInited = true;
+            }
         }
         ]]></fx:Script>
 
-    <s:DataGroup dataProvider="{_entities}" itemRenderer="nl.imotion.hue.view.EntityView" width="100%">
+    <s:DataGroup id="dataGroup" dataProvider="{_groupsCollection}" itemRenderer="nl.imotion.hue.view.GroupView" width="100%" render="init()">
         <s:layout>
-            <s:TileLayout horizontalGap="10" verticalGap="10" />
+            <s:VerticalLayout gap="10" />
         </s:layout>
     </s:DataGroup>
 
