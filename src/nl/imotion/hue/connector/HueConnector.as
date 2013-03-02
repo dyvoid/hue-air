@@ -28,6 +28,8 @@ package nl.imotion.hue.connector
 {
     import flash.net.URLRequestMethod;
 
+    import nl.imotion.delegates.AsyncDelegate;
+
     import nl.imotion.delegates.events.AsyncDelegateEvent;
 
 
@@ -55,14 +57,15 @@ package nl.imotion.hue.connector
         // ____________________________________________________________________________________________________
         // PUBLIC
 
+        public function discover( resultCallback:Function = null, faultCallback:Function = null):BridgeDiscoveryDelegate
+        {
+            return storeAndExecute( new BridgeDiscoveryDelegate( [resultCallback ], [ faultCallback ] ) ) as BridgeDiscoveryDelegate;
+        }
+
+
         public function doRequest( path:String = "", data:String = null, method:String = URLRequestMethod.GET, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            var delegate:HueDelegate = new HueDelegate( path, data, method, [ resultCallback ], [ faultCallback ] );
-            delegate.addEventListener( AsyncDelegateEvent.RESULT, handleDelegateResult );
-            delegate.addEventListener( AsyncDelegateEvent.FAULT, handleDelegateFault );
-            delegate.execute();
-
-            return delegate;
+            return storeAndExecute( new HueDelegate( path, data, method, [ resultCallback ], [ faultCallback ] ) ) as HueDelegate;
         }
 
 
@@ -232,6 +235,16 @@ package nl.imotion.hue.connector
 
         // ____________________________________________________________________________________________________
         // PRIVATE
+
+        private function storeAndExecute( delegate:AsyncDelegate ):AsyncDelegate
+        {
+            delegate.addEventListener( AsyncDelegateEvent.RESULT, handleDelegateResult );
+            delegate.addEventListener( AsyncDelegateEvent.FAULT, handleDelegateFault );
+            delegate.execute();
+
+            return delegate;
+        }
+
 
         private function doGet( path:String = "", data:String = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {

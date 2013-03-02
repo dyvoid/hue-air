@@ -26,7 +26,8 @@
   -->
 
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-               xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:local="*" creationComplete="init()">
+               xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:local="*" xmlns:ui="nl.imotion.hue.view.*"
+               creationComplete="init()">
 
     <fx:Script><![CDATA[
         import com.greensock.TimelineMax;
@@ -67,7 +68,7 @@
 
         private var _lastPoll:Number;
 
-        private var _scheduleUI:ScheduleUI;
+        private var _scheduleUI:ScheduleView;
 
 
         private function init():void
@@ -184,7 +185,7 @@
          }*/
 
 
-       /* private function animate():void
+        /* private function animate():void
          {
          _groupsMap[ 0 ].isOn = true;
          _groupsMap[ 0 ].hue = 0xffff * 0.25;
@@ -198,39 +199,38 @@
 
 
         /*private function animate():void
-        {
-            var lightsArray:Array = [];
-            _lightsMap.forEach( lightsArrayConverter );
-            function lightsArrayConverter( item:HueEntity, index:int, vector:Vector.<HueLight> ):void
-            {
-                lightsArray[ lightsArray.length ] = item;
-            }
+         {
+         var lightsArray:Array = [];
+         _lightsMap.forEach( lightsArrayConverter );
+         function lightsArrayConverter( item:HueEntity, index:int, vector:Vector.<HueLight> ):void
+         {
+         lightsArray[ lightsArray.length ] = item;
+         }
 
-            for ( var j:int = 0; j < lightsArray.length; j++ )
-            {
-                var hueLight:HueLight = lightsArray[j];
+         for ( var j:int = 0; j < lightsArray.length; j++ )
+         {
+         var hueLight:HueLight = lightsArray[j];
 
-                hueLight.isOn = true;
-                hueLight.hue = 0xffff * 0.25;
-            }
+         hueLight.isOn = true;
+         hueLight.hue = 0xffff * 0.25;
+         }
 
-            new TimelineMax( { tweens: [
-                new TimelineMax( { tweens:
-                    TweenMax.allFromTo( lightsArray, 2, { brightness:0, saturation: 0xfe, ease: Expo.easeOut }, { brightness:0xfe, saturation: 0x00 } )
-                    , align: TweenAlign.NORMAL}  ),
-                new TimelineMax( { tweens:
-                TweenMax.allTo( lightsArray, 1, { brightness:0x88, saturation: 0xaa, ease: Expo.easeOut } )
-                    , align: TweenAlign.NORMAL} )
-            ], align: TweenAlign.SEQUENCE
-            } );
+         new TimelineMax( { tweens: [
+         new TimelineMax( { tweens:
+         TweenMax.allFromTo( lightsArray, 2, { brightness:0, saturation: 0xfe, ease: Expo.easeOut }, { brightness:0xfe, saturation: 0x00 } )
+         , align: TweenAlign.NORMAL}  ),
+         new TimelineMax( { tweens:
+         TweenMax.allTo( lightsArray, 1, { brightness:0x88, saturation: 0xaa, ease: Expo.easeOut } )
+         , align: TweenAlign.NORMAL} )
+         ], align: TweenAlign.SEQUENCE
+         } );
 
-           *//* new TimelineMax( { tweens: [
-                TweenMax.fromTo( _groupsMap[0], 2, { brightness:0, saturation: 0xfe, ease: Expo.easeOut }, { brightness:0xfe, saturation: 0x00 } ),
-                TweenMax.to( _groupsMap[0], 1, { brightness:0x88, saturation: 0xaa, ease: Expo.easeOut } )
-            ], align: TweenAlign.SEQUENCE
-            } );*//*
-        }*/
-
+         *//* new TimelineMax( { tweens: [
+         TweenMax.fromTo( _groupsMap[0], 2, { brightness:0, saturation: 0xfe, ease: Expo.easeOut }, { brightness:0xfe, saturation: 0x00 } ),
+         TweenMax.to( _groupsMap[0], 1, { brightness:0x88, saturation: 0xaa, ease: Expo.easeOut } )
+         ], align: TweenAlign.SEQUENCE
+         } );*//*
+         }*/
 
 
         private function processQueue():void
@@ -308,7 +308,7 @@
                 _lightsMap.push( light );
                 _entityMap.push( light );
 
-                var entityUI:EntityUI = new EntityUI();
+                var entityUI:EntityView = new EntityView();
                 entityUI.entity = light;
                 entityUI.width = 200;
                 uiContainer.addElement( entityUI );
@@ -345,6 +345,7 @@
                 lightsArray[ lightsArray.length ] = item;
             }
 
+
             var groupsArray:Array = [];
             _groupsMap.forEach( groupsArrayConverter );
             function groupsArrayConverter( item:HueEntity, index:int, vector:Vector.<HueGroup> ):void
@@ -352,7 +353,8 @@
                 groupsArray[ groupsArray.length ] = item;
             }
 
-            _scheduleUI = new ScheduleUI();
+
+            _scheduleUI = new ScheduleView();
             _scheduleUI.lights = new ArrayCollection( lightsArray );
             _scheduleUI.groups = new ArrayCollection( groupsArray );
             _scheduleUI.addEventListener( Event.COMPLETE, handleScheduleSubmit );
@@ -441,15 +443,29 @@
         }
         ]]></fx:Script>
 
-    <s:VGroup paddingTop="20" paddingRight="20" paddingLeft="20" paddingBottom="20" gap="30" >
-        <s:HGroup id="uiContainer" gap="30" />
+    <s:VGroup paddingTop="20" paddingRight="20" paddingLeft="20" paddingBottom="20" gap="0">
+
+        <s:TabBar dataProvider="{viewStack}" />
+
+        <mx:ViewStack id="viewStack" height="100%">
+            <s:NavigatorContent id="lights" label="Lights">
+                <ui:EntitiesView id="lightsView" />
+            </s:NavigatorContent>
+            <s:NavigatorContent id="groups" label="Groups">
+                <ui:EntitiesView id="groupsView" />
+            </s:NavigatorContent>
+            <s:NavigatorContent id="schedules" label="Schedules">
+                <ui:ScheduleView />
+            </s:NavigatorContent>
+        </mx:ViewStack>
+
+        <mx:HRule />
 
         <s:HGroup width="100%">
             <s:CheckBox id="cbMasterIsOn" selected="@{masterIsOn}" label="Master" fontWeight="bold" />
             <s:HSlider minimum="0" maximum="1" width="100%" value="@{masterBrightness}" stepSize="0.01"  />
         </s:HGroup>
 
-        <s:Group id="scheduleContainer" />
     </s:VGroup>
 
 </s:Application>

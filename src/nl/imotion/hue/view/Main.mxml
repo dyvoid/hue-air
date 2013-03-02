@@ -25,34 +25,31 @@
   - http://code.google.com/p/imotionproductions/
   -->
 
-<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-    xmlns:mx="library://ns.adobe.com/flex/mx" width="100%">
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+               xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:local="*" xmlns:ui="nl.imotion.hue.view.*"
+               creationComplete="init()">
 
     <fx:Script><![CDATA[
-        import nl.imotion.hue.entities.HueEntity;
+
+        import nl.imotion.bindmvc.core.BindMVCCore;
+        import nl.imotion.hue.model.HueModel;
 
 
-        [Bindable]
-        public var entity:HueEntity;
-
-        ]]></fx:Script>
+        private var _model:HueModel;
 
 
-    <s:CheckBox selected="@{entity.isOn}" label="{entity.name}" fontWeight="bold" />
+        private function init():void
+        {
+            var core:BindMVCCore = BindMVCCore.getInstance();
+            core.startup( this );
+            core.bind( EntitiesView, EntitiesViewController );
+            core.bind( ScheduleView, ScheduleViewController );
+            core.registerModel( new HueModel() );
+        }
 
-    <s:HGroup width="100%">
-        <s:Label text="Hue" width="75" />
-        <s:HSlider minimum="0" maximum="0xffff" width="100%" value="@{entity.hue}" stepSize="1" />
-    </s:HGroup>
+    ]]></fx:Script>
 
-    <s:HGroup width="100%">
-        <s:Label text="Saturation" width="75" />
-        <s:HSlider minimum="0" maximum="0xfe" width="100%" value="@{entity.saturation}" stepSize="1" />
-    </s:HGroup>
+    <ui:Interface />
+    <!--<ui:LoginView />-->
 
-    <s:HGroup width="100%">
-        <s:Label text="Brightness" width="75" />
-        <s:HSlider minimum="0" maximum="0xfe" width="100%" value="@{entity.brightness}" stepSize="1" />
-    </s:HGroup>
-
-</s:VGroup>
+</s:Application>
