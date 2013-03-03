@@ -26,9 +26,20 @@
   -->
 
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-    xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="init()">
+         xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="init()" horizontalCenter="0" verticalCenter="0">
 
+    <fx:Metadata>
+        [Event(name="discover", type="nl.imotion.hue.view.events.LoginEvent")]
+        [Event(name="register", type="nl.imotion.hue.view.events.LoginEvent")]
+        [Event(name="connect", type="nl.imotion.hue.view.events.LoginEvent")]
+    </fx:Metadata>
     <fx:Script><![CDATA[
+        import mx.core.IFlexDisplayObject;
+        import mx.events.CloseEvent;
+        import mx.managers.PopUpManager;
+
+        import nl.imotion.hue.view.events.LoginEvent;
+
         import nl.imotion.hue.vo.VOLogin;
 
 
@@ -38,44 +49,95 @@
 
         private function onDiscoverClick():void
         {
-
+            dispatchEvent( new LoginEvent( LoginEvent.DISCOVER ) );
         }
 
 
         private function onRegisterClick():void
         {
-
+            PopUpManager.addPopUp( registerWindow, this, true );
+            PopUpManager.centerPopUp( registerWindow );
         }
 
 
-        private function connect():void
+        protected function onRegisterWindowClose( evt:CloseEvent ):void
         {
-
+            PopUpManager.removePopUp( evt.currentTarget as IFlexDisplayObject );
         }
 
 
         private function init():void
         {
             _loginData = new VOLogin();
-            _loginData.ipAddress = "192.168.1.10";
+//            _loginData.ipAddress = "192.168.1.10";
             _loginData.userName = "c7a514b2b5a681399ecfb86e1265c49c";
             _loginData.deviceType = "";
         }
 
+
+        public function setIpAddress( ipAddress:String ):void
+        {
+            this.enabled = true;
+            _loginData.ipAddress = ipAddress;
+        }
+
+
+        private function register():void
+        {
+            dispatchEvent( new LoginEvent( LoginEvent.REGISTER, _loginData ) );
+        }
+
+
+        private function connect():void
+        {
+            dispatchEvent( new LoginEvent( LoginEvent.CONNECT, _loginData ) );
+        }
+
+
+        public function registerSucces():void
+        {
+            PopUpManager.removePopUp( registerWindow );
+        }
         ]]></fx:Script>
+
+
+    <fx:Declarations>
+
+        <s:TitleWindow id="registerWindow" title="Register" close="onRegisterWindowClose(event);">
+            <s:Group>
+                <s:Form>
+                    <s:FormItem label="User name">
+                        <s:TextInput text="@{_loginData.userName}" width="300"/>
+                    </s:FormItem>
+
+                    <s:FormItem label="Device type">
+                        <s:TextInput text="@{_loginData.deviceType}" width="300"/>
+                    </s:FormItem>
+
+                    <s:FormItem>
+                        <s:Label text="Press the link button on your Hue Bridge before clicking on Register" />
+                    </s:FormItem>
+
+                    <s:FormItem>
+                        <s:Button label="Register" click="register();"/>
+                    </s:FormItem>
+                </s:Form>
+            </s:Group>
+        </s:TitleWindow>
+    </fx:Declarations>
 
     <s:Form>
         <s:FormItem label="IP address" required="true">
             <s:HGroup>
                 <s:TextInput text="@{_loginData.ipAddress}" width="300"/>
-                <s:Button label="Discover" click="onDiscoverClick()" width="100" />
+                <s:Button label="Discover" click="onDiscoverClick()" width="100"/>
             </s:HGroup>
         </s:FormItem>
 
         <s:FormItem label="User name" required="true">
             <s:HGroup>
                 <s:TextInput text="@{_loginData.userName}" width="300"/>
-                <s:Button label="Register" click="onRegisterClick()" width="100" />
+                <s:Button label="Register" click="onRegisterClick()" width="100"/>
             </s:HGroup>
         </s:FormItem>
 

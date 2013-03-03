@@ -72,7 +72,7 @@ package nl.imotion.hue.connector
             if ( !_ipAddress )
                 throw new Error( "Hue Bridge IP address is not set" );
 
-            if ( !_userName )
+            if ( operationName != "register" && !_userName )
                 throw new Error( "User name is not set" );
 
             super.execute();
@@ -165,7 +165,8 @@ package nl.imotion.hue.connector
         private function handleComplete( e:Event ):void
         {
             removeListeners();
-            onResult( _loader.data );
+            trace( _loader.data );
+            onResult( JSON.parse( _loader.data ) );
         }
 
         private function handleFault( e:Event ):void

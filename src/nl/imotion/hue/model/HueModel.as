@@ -36,6 +36,7 @@ package nl.imotion.hue.model
     import nl.imotion.hue.entities.HueLight;
     import nl.imotion.hue.entities.HueSchedule;
     import nl.imotion.hue.notes.ModelReadyNote;
+    import nl.imotion.hue.vo.VOLogin;
 
 
     /**
@@ -77,7 +78,7 @@ package nl.imotion.hue.model
 
         private function init():void
         {
-            _connector = new HueConnector( "192.168.1.10", "c7a514b2b5a681399ecfb86e1265c49c" );
+            _connector = new HueConnector();
 
             _lightsMap = new Vector.<HueLight>();
             _groupsMap = new Vector.<HueGroup>();
@@ -87,16 +88,14 @@ package nl.imotion.hue.model
 
             _queueTimer = new Timer( 1000 / _rateLimit );
             _queueTimer.addEventListener( TimerEvent.TIMER, handleTimerTick );
-
-            _connector.getInfo( onGetInfoResult );
         }
 
         // ____________________________________________________________________________________________________
         // PUBLIC
 
-        public function discover( onResult:Function, onFault:Function ):void
+        public function discoverBridge( onResult:Function, onFault:Function ):void
         {
-            _connector.discover( onResult, onFault );
+            _connector.discoverBridge( onResult, onFault );
         }
 
 
@@ -106,9 +105,18 @@ package nl.imotion.hue.model
         }
 
 
+        public function connect( loginData:VOLogin ):void
+        {
+            _connector.ipAddress = loginData.ipAddress;
+            _connector.userName = loginData.userName;
+
+            _connector.getInfo( onGetInfoResult );
+        }
+
+
         public function addSchedule( schedule:HueSchedule ):void
         {
-            _connector.addSchedule( schedule.toObject(), onResult );
+            _connector.addSchedule( schedule.toObject() );
         }
 
         // ____________________________________________________________________________________________________
@@ -167,12 +175,12 @@ package nl.imotion.hue.model
                 if ( entity is HueLight )
                 {
                     update.transitiontime = Math.round( ( _queueTimer.delay * _queue.length ) / 100 ) + 1;
-                    _connector.updateLight( entity.id, update, onResult );
+                    _connector.updateLight( entity.id, update );
                 }
                 else
                 {
                     update.transitiontime = Math.round( ( _queueTimer.delay * ( _queue.length + HueGroup( entity ).lights.length ) ) / 100 ) + 1;
-                    _connector.updateGroup( entity.id, update, onResult );
+                    _connector.updateGroup( entity.id, update );
                 }
 
                 _queue.shift();
@@ -180,20 +188,11 @@ package nl.imotion.hue.model
         }
 
 
-        private function onResult( data:String ):void
+        private function onGetInfoResult( data:Object ):void
         {
-            trace( data );
-        }
-
-
-        private function onGetInfoResult( data:String ):void
-        {
-            trace( data );
-            var result:Object = JSON.parse( data );
-
             var key:String;
 
-            var lights:Object = result.lights;
+            var lights:Object = data.lights;
             for ( key in lights )
             {
                 var light:HueLight = new HueLight( key, lights[ key ] );
@@ -212,7 +211,7 @@ package nl.imotion.hue.model
             _groupsMap.push( group );
             _entityMap.push( group );
 
-            var groups:Object = result.groups;
+            var groups:Object = data.groups;
             for ( key in groups )
             {
                 group = new HueGroup( key, groups[ key ] );
@@ -336,6 +335,16 @@ package nl.imotion.hue.model
         public function get isReady():Boolean
         {
             return _isReady;
+        }
+
+
+        public function get ipAddress():String
+        {
+            return _connector.ipAddress;
+        }
+        public function set ipAddress( value:String ):void
+        {
+            _connector.ipAddress = value;
         }
 
         // ____________________________________________________________________________________________________

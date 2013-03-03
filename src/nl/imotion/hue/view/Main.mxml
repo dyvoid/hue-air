@@ -42,14 +42,25 @@
         {
             var core:BindMVCCore = BindMVCCore.getInstance();
             core.startup( this );
+            core.bind( LoginView, LoginViewController );
             core.bind( EntitiesView, EntitiesViewController );
             core.bind( ScheduleView, ScheduleViewController );
             core.registerModel( new HueModel() );
+
+            var mainController:MainController = new MainController( this );
+
+            currentState = "loggedOut";
         }
 
     ]]></fx:Script>
 
-    <ui:Interface />
-    <!--<ui:LoginView />-->
+    <s:states>
+        <s:State name="loggedIn"/>
+        <s:State name="loggedOut"/>
+    </s:states>
+
+
+    <ui:LoginView includeIn="loggedOut" />
+    <ui:Interface includeIn="loggedIn" />
 
 </s:Application>

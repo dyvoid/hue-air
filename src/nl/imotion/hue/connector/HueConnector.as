@@ -48,7 +48,7 @@ package nl.imotion.hue.connector
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
-        public function HueConnector( ipAddress:String, userName:String = null )
+        public function HueConnector( ipAddress:String = null, userName:String = null )
         {
             this.ipAddress = ipAddress;
             this.userName = userName;
@@ -57,7 +57,7 @@ package nl.imotion.hue.connector
         // ____________________________________________________________________________________________________
         // PUBLIC
 
-        public function discover( resultCallback:Function = null, faultCallback:Function = null):BridgeDiscoveryDelegate
+        public function discoverBridge( resultCallback:Function = null, faultCallback:Function = null):BridgeDiscoveryDelegate
         {
             return storeAndExecute( new BridgeDiscoveryDelegate( [resultCallback ], [ faultCallback ] ) ) as BridgeDiscoveryDelegate;
         }
@@ -79,6 +79,12 @@ package nl.imotion.hue.connector
             );
 
             return doRequest( "register", data, URLRequestMethod.POST, resultCallback, faultCallback );
+        }
+
+
+        public function unregister( userName:String, resultCallback:Function = null, faultCallback:Function = null  ):HueDelegate
+        {
+            return doDelete( "/config/whitelist/" + userName, null, resultCallback, faultCallback );
         }
 
 
