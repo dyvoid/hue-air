@@ -7,3 +7,5 @@ At the moment this project is still in the early stages, under active developmen
 The full API has been implemented, so you can control lights, groups and schedules through the HueConnector class. 
 
 A basic (read: fugly) MXML interface is in place.
+
+You can find source code for the iMotion SWC here: http://code.google.com/p/imotionproductions/
