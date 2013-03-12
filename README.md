@@ -6,4 +6,4 @@ The full API has been implemented, so you can control lights, groups and schedul
 
 A basic (read: fugly) MXML interface is in place.
 
-You can find source code for the iMotion SWC here: http://code.google.com/p/imotionproductions/
+You can find source code for the required iMotion library here: http://code.google.com/p/imotionproductions/
