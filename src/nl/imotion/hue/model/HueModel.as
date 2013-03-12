@@ -101,7 +101,7 @@ package nl.imotion.hue.model
 
         public function register( userName:String, deviceType:String, onResult:Function, onFault:Function ):void
         {
-            _connector.register( userName, deviceType, onResult, onFault );
+            _connector.addUser( userName, deviceType, onResult, onFault );
         }
 
 
@@ -110,7 +110,7 @@ package nl.imotion.hue.model
             _connector.ipAddress = loginData.ipAddress;
             _connector.userName = loginData.userName;
 
-            _connector.getInfo( onGetInfoResult );
+            _connector.getFullState( onGetInfoResult );
         }
 
 
@@ -175,12 +175,12 @@ package nl.imotion.hue.model
                 if ( entity is HueLight )
                 {
                     update.transitiontime = Math.round( ( _queueTimer.delay * _queue.length ) / 100 ) + 1;
-                    _connector.updateLight( entity.id, update );
+                    _connector.setLightState( entity.id, update );
                 }
                 else
                 {
                     update.transitiontime = Math.round( ( _queueTimer.delay * ( _queue.length + HueGroup( entity ).lights.length ) ) / 100 ) + 1;
-                    _connector.updateGroup( entity.id, update );
+                    _connector.setGroupState( entity.id, update );
                 }
 
                 _queue.shift();
