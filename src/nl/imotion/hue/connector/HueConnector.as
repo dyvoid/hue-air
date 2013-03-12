@@ -29,7 +29,6 @@ package nl.imotion.hue.connector
     import flash.net.URLRequestMethod;
 
     import nl.imotion.delegates.AsyncDelegate;
-
     import nl.imotion.delegates.events.AsyncDelegateEvent;
 
 
@@ -43,8 +42,6 @@ package nl.imotion.hue.connector
         // PROPERTIES
 
 
-
-
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
@@ -54,35 +51,42 @@ package nl.imotion.hue.connector
             this.userName = userName;
         }
 
+
         // ____________________________________________________________________________________________________
         // PUBLIC
 
-        public function discoverBridge( resultCallback:Function = null, faultCallback:Function = null):BridgeDiscoveryDelegate
+        public function discoverBridge( resultCallback:Function = null, faultCallback:Function = null ):BridgeDiscoveryDelegate
         {
             return storeAndExecute( new BridgeDiscoveryDelegate( [resultCallback ], [ faultCallback ] ) ) as BridgeDiscoveryDelegate;
         }
 
 
-        public function doRequest( path:String = "", data:String = null, method:String = URLRequestMethod.GET, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        public function doRequest( path:String = "", data:Object = null, method:String = URLRequestMethod.GET, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            return storeAndExecute( new HueDelegate( path, data, method, [ resultCallback ], [ faultCallback ] ) ) as HueDelegate;
+            var stringifiedData:String;
+
+            if ( data )
+            {
+                stringifiedData = JSON.stringify( data );
+            }
+
+            return storeAndExecute( new HueDelegate( path, stringifiedData, method, [ resultCallback ], [ faultCallback ] ) ) as HueDelegate;
         }
 
 
-        public function register( userName:String, deviceType:String, resultCallback:Function = null, faultCallback:Function = null  ):HueDelegate
+        public function register( userName:String, deviceType:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            var data:String = JSON.stringify (
-                {
-                    "username": userName,
-                    "devicetype": deviceType
-                }
-            );
+            var data:Object =
+            {
+                "username":userName,
+                "devicetype":deviceType
+            };
 
             return doRequest( "register", data, URLRequestMethod.POST, resultCallback, faultCallback );
         }
 
 
-        public function unregister( userName:String, resultCallback:Function = null, faultCallback:Function = null  ):HueDelegate
+        public function unregister( userName:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doDelete( "/config/whitelist/" + userName, null, resultCallback, faultCallback );
         }
@@ -100,15 +104,15 @@ package nl.imotion.hue.connector
         }
 
 
-        public function doLightRequest( id:String, data:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        public function doLightRequest( id:String, data:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            return doPut( "/lights/"+id+"/state", data, resultCallback, faultCallback );
+            return doPut( "/lights/" + id + "/state", data, resultCallback, faultCallback );
         }
 
 
-        public function doGroupRequest( id:String, data:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        public function doGroupRequest( id:String, data:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            return doPut( "/groups/"+id+"/action", data, resultCallback, faultCallback );
+            return doPut( "/groups/" + id + "/action", data, resultCallback, faultCallback );
         }
 
 
@@ -116,11 +120,11 @@ package nl.imotion.hue.connector
         {
             var data:Object =
             {
-                hue: hue,
-                sat: saturation,
-                bri: brightness,
-                on: isOn,
-                transitiontime: transitionTime
+                hue:hue,
+                sat:saturation,
+                bri:brightness,
+                on:isOn,
+                transitiontime:transitionTime
             };
 
             return updateLight( id, data, resultCallback, faultCallback );
@@ -129,7 +133,7 @@ package nl.imotion.hue.connector
 
         public function updateLight( id:String, state:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            return doLightRequest( id, JSON.stringify( state ), resultCallback, faultCallback );
+            return doLightRequest( id, state, resultCallback, faultCallback );
         }
 
 
@@ -137,53 +141,53 @@ package nl.imotion.hue.connector
         {
             var data:Object =
             {
-                hue: hue,
-                sat: saturation,
-                bri: brightness,
-                on: isOn,
-                transitiontime: transitionTime
+                hue:hue,
+                sat:saturation,
+                bri:brightness,
+                on:isOn,
+                transitiontime:transitionTime
             };
 
             return updateGroup( id, data, onResult, onFault );
         }
 
+
         public function updateGroup( id:String, action:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            return doGroupRequest( id, JSON.stringify( action ), resultCallback, faultCallback );
+            return doGroupRequest( id, action, resultCallback, faultCallback );
         }
+
 
         public function toggleLight( id:String, isSwitchedOn:Boolean, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            var data:String = JSON.stringify (
-                {
-                    "on": isSwitchedOn
-                }
-            );
+            var data:Object =
+            {
+                "on": isSwitchedOn
+            };
 
             return doLightRequest( id, data, resultCallback, faultCallback );
         }
 
-         private function toggleGroup( id:String, isSwitchedOn:Boolean, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
-         {
-             var data:String = JSON.stringify (
-                     {
-                         "on": isSwitchedOn
-                     }
-             );
 
-             return doGroupRequest( id, data, resultCallback, faultCallback );
-         }
+        private function toggleGroup( id:String, isSwitchedOn:Boolean, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            var data:Object =
+            {
+                "on": isSwitchedOn
+            }
+
+            return doGroupRequest( id, data, resultCallback, faultCallback );
+        }
 
 
         public function alert( id:String, isLongSelect:Boolean = false, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             var alertMethod:String = isLongSelect ? "lselect" : "select";
 
-            var data:String = JSON.stringify (
+            var data:Object =
                     {
-                        "alert": alertMethod
-                    }
-            );
+                        "alert":alertMethod
+                    };
 
             return doLightRequest( id, data, resultCallback, faultCallback );
         }
@@ -199,7 +203,7 @@ package nl.imotion.hue.connector
         {
             schedule.command.address = schedule.command.address.split( "{userName}" ).join( HueDelegate.userName );
 
-            return doPost( "/schedules", JSON.stringify( schedule ), resultCallback, faultCallback );
+            return doPost( "/schedules", schedule, resultCallback, faultCallback );
         }
 
 
@@ -221,14 +225,13 @@ package nl.imotion.hue.connector
         }
 
 
-        public function addGroup( name:String, lightIDs:Array, resultCallback:Function = null, faultCallback:Function = null):HueDelegate
+        public function addGroup( name:String, lightIDs:Array, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            var data:String = JSON.stringify (
+            var data:Object =
                     {
-                        "name": name,
-                        "lights": lightIDs
-                    }
-            );
+                        "name":name,
+                        "lights":lightIDs
+                    };
 
             return doPost( "/groups", data, resultCallback, faultCallback );
         }
@@ -238,6 +241,7 @@ package nl.imotion.hue.connector
         {
             return doDelete( "/groups/" + id, null, resultCallback, faultCallback );
         }
+
 
         // ____________________________________________________________________________________________________
         // PRIVATE
@@ -252,28 +256,29 @@ package nl.imotion.hue.connector
         }
 
 
-        private function doGet( path:String = "", data:String = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        private function doGet( path:String = "", data:Object = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doRequest( path, data, URLRequestMethod.GET, resultCallback, faultCallback );
         }
 
 
-        private function doPut( path:String = "", data:String = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        private function doPut( path:String = "", data:Object = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doRequest( path, data, URLRequestMethod.PUT, resultCallback, faultCallback );
         }
 
 
-        private function doPost( path:String = "", data:String = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        private function doPost( path:String = "", data:Object = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doRequest( path, data, URLRequestMethod.POST, resultCallback, faultCallback );
         }
 
 
-        private function doDelete( path:String = "", data:String = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        private function doDelete( path:String = "", data:Object = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doRequest( path, data, URLRequestMethod.DELETE, resultCallback, faultCallback );
         }
+
 
         // ____________________________________________________________________________________________________
         // PROTECTED
@@ -289,6 +294,7 @@ package nl.imotion.hue.connector
             // Placeholder for subclass
         }
 
+
         // ____________________________________________________________________________________________________
         // GETTERS / SETTERS
 
@@ -296,6 +302,8 @@ package nl.imotion.hue.connector
         {
             return HueDelegate.ipAddress;
         }
+
+
         public function set ipAddress( value:String ):void
         {
             HueDelegate.ipAddress = value;
@@ -306,10 +314,13 @@ package nl.imotion.hue.connector
         {
             return HueDelegate.userName;
         }
+
+
         public function set userName( value:String ):void
         {
             HueDelegate.userName = value;
         }
+
 
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS

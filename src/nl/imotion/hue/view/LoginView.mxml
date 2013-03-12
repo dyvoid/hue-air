@@ -69,7 +69,7 @@
         private function init():void
         {
             _loginData = new VOLogin();
-//            _loginData.ipAddress = "192.168.1.10";
+            _loginData.ipAddress = "192.168.1.10";
             _loginData.userName = "c7a514b2b5a681399ecfb86e1265c49c";
             _loginData.deviceType = "";
         }
