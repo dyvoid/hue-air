@@ -29,16 +29,16 @@
          xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="init()" horizontalCenter="0" verticalCenter="0">
 
     <fx:Metadata>
-        [Event(name="discover", type="nl.imotion.hue.view.events.LoginEvent")]
-        [Event(name="register", type="nl.imotion.hue.view.events.LoginEvent")]
-        [Event(name="connect", type="nl.imotion.hue.view.events.LoginEvent")]
+        [Event(name="discover", type="nl.imotion.hue.view.events.ConnectFormEvent")]
+        [Event(name="register", type="nl.imotion.hue.view.events.ConnectFormEvent")]
+        [Event(name="connect", type="nl.imotion.hue.view.events.ConnectFormEvent")]
     </fx:Metadata>
     <fx:Script><![CDATA[
         import mx.core.IFlexDisplayObject;
         import mx.events.CloseEvent;
         import mx.managers.PopUpManager;
 
-        import nl.imotion.hue.view.events.LoginEvent;
+        import nl.imotion.hue.view.events.ConnectFormEvent;
 
         import nl.imotion.hue.vo.VOLogin;
 
@@ -49,7 +49,7 @@
 
         private function onDiscoverClick():void
         {
-            dispatchEvent( new LoginEvent( LoginEvent.DISCOVER ) );
+            dispatchEvent( new ConnectFormEvent( ConnectFormEvent.DISCOVER ) );
         }
 
 
@@ -84,13 +84,13 @@
 
         private function register():void
         {
-            dispatchEvent( new LoginEvent( LoginEvent.REGISTER, _loginData ) );
+            dispatchEvent( new ConnectFormEvent( ConnectFormEvent.REGISTER, _loginData ) );
         }
 
 
         private function connect():void
         {
-            dispatchEvent( new LoginEvent( LoginEvent.CONNECT, _loginData ) );
+            dispatchEvent( new ConnectFormEvent( ConnectFormEvent.CONNECT, _loginData ) );
         }
 
 

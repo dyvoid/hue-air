@@ -34,13 +34,13 @@ package nl.imotion.hue.view
     import nl.imotion.bindmvc.controller.BindController;
     import nl.imotion.hue.model.HueModel;
     import nl.imotion.hue.util.VectorConverter;
-    import nl.imotion.hue.view.events.LoginEvent;
+    import nl.imotion.hue.view.events.ConnectFormEvent;
 
 
     /**
      * @author Pieter van de Sluis
      */
-    public class LoginViewController extends BindController
+    public class ConnectViewController extends BindController
     {
         // ____________________________________________________________________________________________________
         // PROPERTIES
@@ -49,7 +49,7 @@ package nl.imotion.hue.view
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
-        public function LoginViewController( viewComponent:DisplayObject )
+        public function ConnectViewController( viewComponent:DisplayObject )
         {
             super( viewComponent );
 
@@ -65,7 +65,7 @@ package nl.imotion.hue.view
 
         private function init():void
         {
-            startEventInterest( view, [ LoginEvent.DISCOVER, LoginEvent.REGISTER, LoginEvent.CONNECT ], handleLoginEvent );
+            startEventInterest( view, [ ConnectFormEvent.DISCOVER, ConnectFormEvent.REGISTER, ConnectFormEvent.CONNECT ], handleLoginEvent );
         }
 
         // ____________________________________________________________________________________________________
@@ -81,30 +81,30 @@ package nl.imotion.hue.view
         }
 
 
-        private function get view():LoginView
+        private function get view():ConnectView
         {
-            return defaultView as LoginView;
+            return defaultView as ConnectView;
         }
 
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS
 
-        private function handleLoginEvent( e:LoginEvent ):void
+        private function handleLoginEvent( e:ConnectFormEvent ):void
         {
             view.enabled = false;
 
             switch ( e.type )
             {
-                case LoginEvent.DISCOVER:
+                case ConnectFormEvent.DISCOVER:
                     model.discoverBridge( onDiscoverResult, onDiscoverFault );
                     break;
 
-                case LoginEvent.REGISTER:
+                case ConnectFormEvent.REGISTER:
                     model.ipAddress = e.loginData.ipAddress;
                     model.register( e.loginData.userName, e.loginData.deviceType, onRegisterResult, onRegisterFault );
                     break;
 
-                case LoginEvent.CONNECT:
+                case ConnectFormEvent.CONNECT:
                     model.connect( e.loginData );
                     break;
             }

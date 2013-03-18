@@ -34,7 +34,7 @@ package nl.imotion.hue.view.events
     /**
      * @author Pieter van de Sluis
      */
-    public class LoginEvent extends Event
+    public class ConnectFormEvent extends Event
     {
         public static const DISCOVER        :String = "discover";
         public static const REGISTER        :String = "register";
@@ -42,7 +42,7 @@ package nl.imotion.hue.view.events
 
         private var _loginData:VOLogin;
 
-        public function LoginEvent(type:String, loginData:VOLogin = null, bubbles:Boolean = false, cancelable:Boolean = false):void
+        public function ConnectFormEvent(type:String, loginData:VOLogin = null, bubbles:Boolean = false, cancelable:Boolean = false):void
         {
             super(type, bubbles, cancelable);
             this._loginData = loginData;
@@ -55,12 +55,12 @@ package nl.imotion.hue.view.events
 
         override public function clone():Event
         {
-            return new LoginEvent(this.type, this._loginData, this.bubbles, this.cancelable);
+            return new ConnectFormEvent(this.type, this._loginData, this.bubbles, this.cancelable);
         }
 
         override public function toString():String
         {
-            return formatToString("LoginEvent", "type", "loginData", "bubbles", "cancelable", "eventPhase");
+            return formatToString("ConnectFormEvent", "type", "loginData", "bubbles", "cancelable", "eventPhase");
         }
     }
 }

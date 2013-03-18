@@ -47,11 +47,4 @@
         </s:NavigatorContent>
     </mx:ViewStack>
 
-    <mx:HRule width="100%" />
-
-    <s:HGroup width="100%">
-        <s:CheckBox id="cbMasterIsOn" label="Master" fontWeight="bold" />
-        <s:HSlider minimum="0" maximum="1" width="100%" stepSize="0.01"  />
-    </s:HGroup>
-
 </s:VGroup>

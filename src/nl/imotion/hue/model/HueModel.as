@@ -28,6 +28,7 @@ package nl.imotion.hue.model
 {
     import flash.events.TimerEvent;
     import flash.utils.Timer;
+    import flash.utils.getTimer;
 
     import nl.imotion.bindmvc.model.BindModel;
     import nl.imotion.hue.connector.HueConnector;
@@ -58,10 +59,11 @@ package nl.imotion.hue.model
         private var _queue:Vector.<HueEntity>;
         private var _queueTimer:Timer;
 
-        private var _rateLimit:uint = 20;
+        private var _lightRequestRateLimit:uint = 10;
+        private var _groupRequestRateLimit:uint = 1;
 
-        private var _masterBrightness:Number = 1;
-        private var _masterIsOn:Boolean = true;
+        private var _lastLightRequestTime:uint = 0;
+        private var _lastGroupRequestTime:uint = 0;
 
         private var _isReady:Boolean = false;
 
@@ -86,7 +88,7 @@ package nl.imotion.hue.model
 
             _queue = new Vector.<HueEntity>();
 
-            _queueTimer = new Timer( 1000 / _rateLimit );
+            _queueTimer = new Timer( 1000 / ( _lightRequestRateLimit - 1 ) );
             _queueTimer.addEventListener( TimerEvent.TIMER, handleTimerTick );
         }
 
@@ -139,6 +141,7 @@ package nl.imotion.hue.model
             var entityMapLength:uint = _entityMap.length;
             var entityMapClone:Vector.<HueEntity> = _entityMap.concat();
 
+            // Update the queue
             for ( var i:int = 0; i < entityMapLength; i++ )
             {
                 var rndIndex:uint = Math.floor( Math.random() * entityMapClone.length );
@@ -164,27 +167,42 @@ package nl.imotion.hue.model
                 }
             }
 
-            if ( _queue.length != 0 )
+            // Process the first available entity
+            for ( var j:int = 0; j < _queue.length; j++ )
             {
-                entity = _queue[ 0 ];
-
-                var update:Object = entity.flushUpdateObject();
-                update.bri = Math.round( entity.brightness * _masterBrightness );
-                update.on = _masterIsOn ? entity.isOn : false;
+                entity = _queue[ j ];
 
                 if ( entity is HueLight )
                 {
-                    update.transitiontime = Math.round( ( _queueTimer.delay * _queue.length ) / 100 ) + 1;
-                    _connector.setLightState( entity.id, update );
+                    if ( ( getTimer() - _lastLightRequestTime ) > ( 1000 / _lightRequestRateLimit ) )
+                    {
+                        _connector.setLightState( entity.id, getUpdateObject( entity ) );
+                        _lastLightRequestTime = getTimer();
+                        _queue.splice( j, 1 );
+                        break;
+                    }
                 }
-                else
+                else if ( entity is HueGroup )
                 {
-                    update.transitiontime = Math.round( ( _queueTimer.delay * ( _queue.length + HueGroup( entity ).lights.length ) ) / 100 ) + 1;
-                    _connector.setGroupState( entity.id, update );
+                    if ( ( getTimer() - _lastGroupRequestTime ) > ( 1000 / _groupRequestRateLimit ) )
+                    {
+                        _connector.setGroupState( entity.id, getUpdateObject( entity ) );
+                        _lastGroupRequestTime = getTimer();
+                        _queue.splice( j, 1 );
+                        break;
+                    }
                 }
-
-                _queue.shift();
             }
+        }
+
+
+        private function getUpdateObject( entity:HueEntity ):Object
+        {
+            var updateObject:Object = entity.flushUpdateObject();
+            updateObject.transitiontime = Math.floor( ( _queueTimer.delay * _queue.length ) / 100 ) + 1;
+            trace(updateObject.transitiontime);
+
+            return updateObject
         }
 
 
@@ -277,33 +295,6 @@ package nl.imotion.hue.model
         // ____________________________________________________________________________________________________
         // GETTERS / SETTERS
 
-        [Bindable]
-        public function get masterBrightness():Number
-        {
-            return _masterBrightness;
-        }
-        public function set masterBrightness( value:Number ):void
-        {
-            if ( _masterBrightness == value ) return;
-
-            _masterBrightness = value;
-            invalidateAllLights();
-        }
-
-
-        [Bindable]
-        public function get masterIsOn():Boolean
-        {
-            return _masterIsOn;
-        }
-        public function set masterIsOn( value:Boolean ):void
-        {
-            if ( _masterBrightness == value ) return;
-
-            _masterIsOn = value;
-            invalidateAllLights();
-        }
-
         public function get lightsMap():Vector.<HueLight>
         {
             return _lightsMap;
@@ -322,13 +313,13 @@ package nl.imotion.hue.model
         }
 
 
-        public function get rateLimit():uint
+        public function get lightRequestRateLimit():uint
         {
-            return _rateLimit;
+            return _lightRequestRateLimit;
         }
-        public function set rateLimit( value:uint ):void
+        public function set lightRequestRateLimit( value:uint ):void
         {
-            _rateLimit = value;
+            _lightRequestRateLimit = value;
         }
 
 

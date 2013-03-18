@@ -30,7 +30,6 @@
                creationComplete="init()">
 
     <fx:Script><![CDATA[
-
         import nl.imotion.bindmvc.core.BindMVCCore;
         import nl.imotion.hue.model.HueModel;
 
@@ -42,7 +41,7 @@
         {
             var core:BindMVCCore = BindMVCCore.getInstance();
             core.startup( this );
-            core.bind( LoginView, LoginViewController );
+            core.bind( ConnectView, ConnectViewController );
             core.bind( EntitiesView, EntitiesViewController );
             core.bind( ScheduleView, ScheduleViewController );
             core.registerModel( new HueModel() );
@@ -51,8 +50,7 @@
 
             currentState = "loggedOut";
         }
-
-    ]]></fx:Script>
+        ]]></fx:Script>
 
     <s:states>
         <s:State name="loggedIn"/>
@@ -60,7 +58,7 @@
     </s:states>
 
 
-    <ui:LoginView includeIn="loggedOut" />
+    <ui:ConnectView includeIn="loggedOut" />
     <ui:Interface includeIn="loggedIn" />
 
 </s:Application>
