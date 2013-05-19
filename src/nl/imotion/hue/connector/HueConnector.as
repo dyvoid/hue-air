@@ -71,7 +71,7 @@ package nl.imotion.hue.connector
 
             if ( data )
             {
-                stringifiedData = JSON.stringify( data );
+                stringifiedData = JSON.stringify( data )
             }
 
             return storeAndExecute( new HueDelegate( path, stringifiedData, urlRequestMethod, [ resultCallback ], [ faultCallback ] ) ) as HueDelegate;
@@ -95,7 +95,7 @@ package nl.imotion.hue.connector
         /**
          * Allows the user to set configuration values.
          *
-         * @param data                  an object containing the configuration values
+         * @param data                  an <code>Object</code> containing the configuration values
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
          * @return                      the <code>HueDelegate</code> that will be used in the communication
@@ -693,7 +693,7 @@ package nl.imotion.hue.connector
          */
         public function createSchedule( schedule:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            schedule.command.address = schedule.command.address.split( "{userName}" ).join( HueDelegate.userName );
+            setScheduleUserName( schedule );
 
             return doPost( "/schedules", schedule, resultCallback, faultCallback );
         }
@@ -710,7 +710,7 @@ package nl.imotion.hue.connector
          */
         public function changeSchedule( scheduleID:String, schedule:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            schedule.command.address = schedule.command.address.split( "{userName}" ).join( HueDelegate.userName );
+            setScheduleUserName( schedule );
 
             return doPut( "/schedules/" + scheduleID, schedule, resultCallback, faultCallback );
         }
@@ -767,6 +767,15 @@ package nl.imotion.hue.connector
         private function doDelete( path:String = "", data:Object = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doRequest( path, data, URLRequestMethod.DELETE, resultCallback, faultCallback );
+        }
+
+
+        private function setScheduleUserName( schedule:Object ):void
+        {
+            if ( schedule.command && schedule.command.address )
+            {
+                schedule.command.address = schedule.command.address.split( "{userName}" ).join( HueDelegate.userName );
+            }
         }
 
 

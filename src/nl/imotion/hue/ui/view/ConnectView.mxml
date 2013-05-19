@@ -1,0 +1,149 @@
+<?xml version="1.0"?>
+<!--
+  - Licensed under the MIT license
+  -
+  - Copyright (c) 2009-2013 Pieter van de Sluis
+  -
+  - Permission is hereby granted, free of charge, to any person obtaining a copy
+  - of this software and associated documentation files (the "Software"), to deal
+  - in the Software without restriction, including without limitation the rights
+  - to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  - copies of the Software, and to permit persons to whom the Software is
+  - furnished to do so, subject to the following conditions:
+  -
+  - The above copyright notice and this permission notice shall be included in
+  - all copies or substantial portions of the Software.
+  -
+  - THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  - IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  - FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  - AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  - LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  - THE SOFTWARE.
+  -
+  - http://code.google.com/p/imotionproductions/
+  -->
+
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+         xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="init()" horizontalCenter="0" verticalCenter="0">
+
+    <fx:Metadata>
+        [Event(name="discover", type="nl.imotion.hue.ui.view.events.ConnectFormEvent")]
+        [Event(name="register", type="nl.imotion.hue.ui.view.events.ConnectFormEvent")]
+        [Event(name="connect", type="nl.imotion.hue.ui.view.events.ConnectFormEvent")]
+    </fx:Metadata>
+    <fx:Script><![CDATA[
+        import mx.core.IFlexDisplayObject;
+        import mx.events.CloseEvent;
+        import mx.managers.PopUpManager;
+
+        import nl.imotion.hue.ui.view.events.ConnectFormEvent;
+
+        import nl.imotion.hue.ui.vo.VOLogin;
+
+
+        [Bindable]
+        private var _loginData:VOLogin;
+
+
+        private function onDiscoverClick():void
+        {
+            dispatchEvent( new ConnectFormEvent( ConnectFormEvent.DISCOVER ) );
+        }
+
+
+        private function onRegisterClick():void
+        {
+            PopUpManager.addPopUp( registerWindow, this, true );
+            PopUpManager.centerPopUp( registerWindow );
+        }
+
+
+        protected function onRegisterWindowClose( evt:CloseEvent ):void
+        {
+            PopUpManager.removePopUp( evt.currentTarget as IFlexDisplayObject );
+        }
+
+
+        private function init():void
+        {
+            _loginData = new VOLogin();
+            _loginData.ipAddress = "192.168.1.10";
+            _loginData.userName = "c7a514b2b5a681399ecfb86e1265c49c";
+            _loginData.deviceType = "";
+        }
+
+
+        public function setIpAddress( ipAddress:String ):void
+        {
+            this.enabled = true;
+            _loginData.ipAddress = ipAddress;
+        }
+
+
+        private function register():void
+        {
+            dispatchEvent( new ConnectFormEvent( ConnectFormEvent.REGISTER, _loginData ) );
+        }
+
+
+        private function connect():void
+        {
+            dispatchEvent( new ConnectFormEvent( ConnectFormEvent.CONNECT, _loginData ) );
+        }
+
+
+        public function registerSucces():void
+        {
+            PopUpManager.removePopUp( registerWindow );
+        }
+        ]]></fx:Script>
+
+
+    <fx:Declarations>
+
+        <s:TitleWindow id="registerWindow" title="Register" close="onRegisterWindowClose(event);">
+            <s:Group>
+                <s:Form>
+                    <s:FormItem label="User name">
+                        <s:TextInput text="@{_loginData.userName}" width="300"/>
+                    </s:FormItem>
+
+                    <s:FormItem label="Device type">
+                        <s:TextInput text="@{_loginData.deviceType}" width="300"/>
+                    </s:FormItem>
+
+                    <s:FormItem>
+                        <s:Label text="Press the link button on your Hue Bridge before clicking on Register" />
+                    </s:FormItem>
+
+                    <s:FormItem>
+                        <s:Button label="Register" click="register();"/>
+                    </s:FormItem>
+                </s:Form>
+            </s:Group>
+        </s:TitleWindow>
+    </fx:Declarations>
+
+    <s:Form>
+        <s:FormItem label="IP address" required="true">
+            <s:HGroup>
+                <s:TextInput text="@{_loginData.ipAddress}" width="300"/>
+                <s:Button label="Discover" click="onDiscoverClick()" width="100"/>
+            </s:HGroup>
+        </s:FormItem>
+
+        <s:FormItem label="User name" required="true">
+            <s:HGroup>
+                <s:TextInput text="@{_loginData.userName}" width="300"/>
+                <s:Button label="Register" click="onRegisterClick()" width="100"/>
+            </s:HGroup>
+        </s:FormItem>
+
+        <s:FormItem>
+            <s:Button label="Connect" click="connect();"/>
+        </s:FormItem>
+    </s:Form>
+
+</s:Group>
