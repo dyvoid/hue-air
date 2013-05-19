@@ -24,12 +24,22 @@
  * http://code.google.com/p/imotionproductions/
  */
 
-package nl.imotion.hue.ui.view
+package nl.imotion.hue.ui.view.schedules
 {
+    import nl.imotion.hue.ui.view.*;
+    import flash.display.DisplayObject;
+    import flash.events.Event;
+
+    import nl.imotion.bindmvc.controller.BindController;
+    import nl.imotion.hue.manager.entities.HueSchedule;
+    import nl.imotion.hue.ui.model.HueModel;
+    import nl.imotion.hue.ui.util.VectorConverter;
+
+
     /**
      * @author Pieter van de Sluis
      */
-    public class InterfaceController
+    public class ScheduleViewController extends BindController
     {
         // ____________________________________________________________________________________________________
         // PROPERTIES
@@ -38,10 +48,12 @@ package nl.imotion.hue.ui.view
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
-        public function InterfaceController()
+        public function ScheduleViewController( viewComponent:DisplayObject )
         {
-        }
+            super( viewComponent );
 
+            init();
+        }
 
         // ____________________________________________________________________________________________________
         // PUBLIC
@@ -50,6 +62,13 @@ package nl.imotion.hue.ui.view
         // ____________________________________________________________________________________________________
         // PRIVATE
 
+        private function init():void
+        {
+            startEventInterest( defaultView, Event.COMPLETE, onFormSubmit );
+
+            view.lights = VectorConverter.toArrayCollection( model.lightsMap );
+            view.groups = VectorConverter.toArrayCollection( model.groupsMap );
+        }
 
         // ____________________________________________________________________________________________________
         // PROTECTED
@@ -58,10 +77,24 @@ package nl.imotion.hue.ui.view
         // ____________________________________________________________________________________________________
         // GETTERS / SETTERS
 
+        private function get model():HueModel
+        {
+            return retrieveModel( HueModel.NAME ) as HueModel;
+        }
+
+
+        private function get view():ScheduleView
+        {
+            return defaultView as ScheduleView;
+        }
 
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS
 
+        private function onFormSubmit( e:Event ):void
+        {
+            model.createSchedule( view.schedule );
+        }
 
     }
 }

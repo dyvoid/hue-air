@@ -26,7 +26,8 @@
   -->
 
 <s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-          xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:ui="nl.imotion.hue.ui.view.*"
+          xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:lights="nl.imotion.hue.ui.view.lights.*"
+          xmlns:schedules="nl.imotion.hue.ui.view.schedules.*"
           paddingTop="20" paddingRight="20" paddingLeft="20" paddingBottom="20" gap="20" width="100%" height="100%">
 
     <fx:Script><![CDATA[
@@ -34,16 +35,16 @@
 
         ]]></fx:Script>
 
-    <s:TabBar dataProvider="{viewStack}" />
+    <s:TabBar dataProvider="{viewStack}"/>
 
     <mx:ViewStack id="viewStack" width="100%" height="100%">
         <s:NavigatorContent id="lights" label="Lights" width="100%">
             <s:Scroller width="100%" height="100%">
-                <ui:EntitiesView width="100%" />
+                <lights:EntitiesView width="100%"/>
             </s:Scroller>
         </s:NavigatorContent>
         <s:NavigatorContent id="schedules" label="Schedules" width="100%">
-            <ui:ScheduleView width="100%" />
+            <schedules:ScheduleView width="100%"/>
         </s:NavigatorContent>
     </mx:ViewStack>
 

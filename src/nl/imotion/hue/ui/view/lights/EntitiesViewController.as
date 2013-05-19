@@ -24,23 +24,21 @@
  * http://code.google.com/p/imotionproductions/
  */
 
-package nl.imotion.hue.ui.view
+package nl.imotion.hue.ui.view.lights
 {
-    import flash.display.DisplayObject;
-    import flash.events.Event;
-
-    import mx.controls.Alert;
+    import mx.core.UIComponent;
 
     import nl.imotion.bindmvc.controller.BindController;
+    import nl.imotion.hue.manager.entities.HueGroup;
     import nl.imotion.hue.ui.model.HueModel;
+    import nl.imotion.hue.ui.notes.ModelReadyNote;
     import nl.imotion.hue.ui.util.VectorConverter;
-    import nl.imotion.hue.ui.view.events.ConnectFormEvent;
 
 
     /**
      * @author Pieter van de Sluis
      */
-    public class ConnectViewController extends BindController
+    public class EntitiesViewController extends BindController
     {
         // ____________________________________________________________________________________________________
         // PROPERTIES
@@ -49,7 +47,7 @@ package nl.imotion.hue.ui.view
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
-        public function ConnectViewController( viewComponent:DisplayObject )
+        public function EntitiesViewController( viewComponent:UIComponent )
         {
             super( viewComponent );
 
@@ -65,7 +63,20 @@ package nl.imotion.hue.ui.view
 
         private function init():void
         {
-            startEventInterest( view, [ ConnectFormEvent.DISCOVER, ConnectFormEvent.REGISTER, ConnectFormEvent.CONNECT ], handleLoginEvent );
+            if ( !model.isReady )
+            {
+                this.startNoteInterest( ModelReadyNote.MODEL_READY, onModelReady );
+            }
+            else
+            {
+                start( model.groupsMap );
+            }
+        }
+
+
+        private function start( groupsMap:Vector.<HueGroup> ):void
+        {
+            view.groupsCollection = VectorConverter.toArrayCollection( groupsMap );
         }
 
         // ____________________________________________________________________________________________________
@@ -81,83 +92,19 @@ package nl.imotion.hue.ui.view
         }
 
 
-        private function get view():ConnectView
+        private function get view():EntitiesView
         {
-            return defaultView as ConnectView;
+            return defaultView as EntitiesView;
         }
 
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS
 
-        private function handleLoginEvent( e:ConnectFormEvent ):void
+        private function onModelReady( n:ModelReadyNote ):void
         {
-            view.enabled = false;
+            this.stopNoteInterest( ModelReadyNote.MODEL_READY, onModelReady );
 
-            switch ( e.type )
-            {
-                case ConnectFormEvent.DISCOVER:
-                    model.discoverBridge( onDiscoverResult, onDiscoverFault );
-                    break;
-
-                case ConnectFormEvent.REGISTER:
-                    model.ipAddress = e.loginData.ipAddress;
-                    model.createUser( e.loginData.userName, e.loginData.deviceType, onRegisterResult, onRegisterFault );
-                    break;
-
-                case ConnectFormEvent.CONNECT:
-                    model.connect( e.loginData );
-                    break;
-            }
-        }
-
-
-        private function onDiscoverFault( data:* ):void
-        {
-            Alert.show( "Hue Bridge could not be found", "Failed" );
-            view.enabled = true;
-        }
-
-
-        private function onDiscoverResult( data:* ):void
-        {
-            if ( data is Array && data.length > 0 && data[ 0 ].internalipaddress )
-            {
-                view.enabled = true;
-                view.setIpAddress( data[ 0 ].internalipaddress );
-            }
-            else
-            {
-                onDiscoverFault( null );
-            }
-        }
-
-
-        private function onRegisterFault( data:* ):void
-        {
-            if ( data is String )
-            {
-                Alert.show( data, "Failed" );
-            }
-            else
-            {
-                Alert.show( "Registration failed", "Failed" );
-            }
-
-            view.enabled = true;
-        }
-
-
-        private function onRegisterResult( data:Object ):void
-        {
-            if ( !data[0].error )
-            {
-                view.enabled = true;
-                view.registerSucces();
-            }
-            else
-            {
-                onRegisterFault( data[0].error.description );
-            }
+            start( n.groupsMap );
         }
 
     }
