@@ -59,7 +59,7 @@ package nl.imotion.hue.manager
         private var _lastLightRequestTime:uint = 0;
         private var _lastGroupRequestTime:uint = 0;
 
-        private var _heartbeatInterval:uint = 5000;
+        private var _heartbeatInterval:uint = 10000;
         private var _lastHeartbeatTime:uint = 0;
 
         private var _isReady:Boolean = false;
@@ -94,12 +94,26 @@ package nl.imotion.hue.manager
         // ____________________________________________________________________________________________________
         // PUBLIC
 
+        /**
+         * Attempts to discover the Bridge through the Hue Portal
+         *
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         */
         public function discoverBridge( resultCallback:Function, faultCallback:Function ):void
         {
             _connector.discoverBridgeThroughPortal( resultCallback, faultCallback );
         }
 
 
+        /**
+         * Connects to the Hue Bridge on a given IP address and a user name
+         *
+         * @param ipAddress         the IP address of the Hue Bridge
+         * @param userName          a white listed user name
+         * @param resultCallback    callback to be used for a successful result
+         * @param faultCallback     callback to be used for an unsuccessful result
+         */
         public function connect( ipAddress:String, userName:String, resultCallback:Function, faultCallback:Function ):void
         {
             _connector.ipAddress = ipAddress;
@@ -111,18 +125,38 @@ package nl.imotion.hue.manager
         }
 
 
+        /**
+         * Creates a new user.
+         *
+         * @param deviceType            description of the type of device associated with this username
+         * @param userName              the user name
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         */
         public function createUser( userName:String, deviceType:String, resultCallback:Function = null, faultCallback:Function = null ):void
         {
             _connector.createUser( userName, deviceType, resultCallback, faultCallback );
         }
 
 
+        /**
+         * Allows the user to create a new schedule.
+         *
+         * @param schedule              an <code>HueSchedule</code> containing the full schedule data
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         */
         public function createSchedule( schedule:HueSchedule, resultCallback:Function = null, faultCallback:Function = null ):void
         {
             _connector.createSchedule( schedule.toObject(), resultCallback, faultCallback );
         }
 
 
+        /**
+         * Invalidates a light, so that its properties will be processed in the next queue update
+         * @param lightID       the ID of the light
+         * @return              the new state Object of the light
+         */
         public function invalidateLightByID( lightID:String ):Object
         {
             var light:HueLight = getLightByID( lightID );
@@ -136,12 +170,51 @@ package nl.imotion.hue.manager
         }
 
 
+        /**
+         * Invalidates all lights, so that their properties will be processed in the next rate limited update
+         */
         public function invalidateAllLights():void
         {
             for each ( var light:HueEntity in _lightsMap )
             {
                 light.invalidate();
             }
+        }
+
+
+        /**
+         * Get a light
+         *
+         * @param id        the ID of the light
+         * @return          the <code>HueLight</code> instance, or <code>null</code> if it does not exist
+         */
+        private function getLightByID( id:String ):HueLight
+        {
+            for each ( var light:HueLight in _lightsMap )
+            {
+                if ( light.id == id )
+                    return light;
+            }
+
+            return null;
+        }
+
+
+        /**
+         * Get a group
+         *
+         * @param id        the ID of the group
+         * @return          the <code>HueGroup</code> instance, or <code>null</code> if it does not exist
+         */
+        private function getGroupByID( id:String ):HueGroup
+        {
+            for each ( var group:HueGroup in _groupsMap )
+            {
+                if ( group.id == id )
+                    return group;
+            }
+
+            return null;
         }
 
         // ____________________________________________________________________________________________________
@@ -199,7 +272,7 @@ package nl.imotion.hue.manager
                 {
                     if ( ( getTimer() - _lastLightRequestTime ) > ( 1000 / _lightRequestRateLimit ) )
                     {
-                        _connector.setLightState( entity.id, getUpdateObject( entity ) );
+                        _connector.setLightState( entity.id, getEntityUpdateObject( entity ) );
                         _lastLightRequestTime = getTimer();
                         _queue.splice( j, 1 );
                         break;
@@ -209,7 +282,7 @@ package nl.imotion.hue.manager
                 {
                     if ( ( getTimer() - _lastGroupRequestTime ) > ( 1000 / _groupRequestRateLimit ) )
                     {
-                        _connector.setGroupState( entity.id, getUpdateObject( entity ) );
+                        _connector.setGroupState( entity.id, getEntityUpdateObject( entity ) );
                         _lastGroupRequestTime = getTimer();
                         _queue.splice( j, 1 );
                         break;
@@ -225,7 +298,7 @@ package nl.imotion.hue.manager
         }
 
 
-        private function getUpdateObject( entity:HueEntity ):Object
+        private function getEntityUpdateObject( entity:HueEntity ):Object
         {
             var updateObject:Object = entity.flushUpdateObject();
 
@@ -240,9 +313,32 @@ package nl.imotion.hue.manager
 
         private function onGetFullState( data:Object ):void
         {
+            processFullStateUpdate( data );
+
+            if ( ! _isReady )
+            {
+                _lastHeartbeatTime = getTimer();
+                startQueue();
+
+                _isReady = true;
+
+                if ( _connectResultCallback != null )
+                {
+                    var callback:Function = _connectResultCallback;
+                    _connectResultCallback = null;
+
+                    callback();
+                }
+            }
+        }
+
+
+        private function processFullStateUpdate( fullStateData:Object ):void
+        {
+            var lights:Object = fullStateData.lights;
             var key:String;
 
-            var lights:Object = data.lights;
+            // Update/create the lights
             for ( key in lights )
             {
                 var light:HueLight = getLightByID( key );
@@ -259,9 +355,9 @@ package nl.imotion.hue.manager
                 }
             }
 
+            // If this is the first time, manually add the default group
             if ( _groupsMap.length == 0 )
             {
-                // Add default group
                 var group:HueGroup = new HueGroup( "0" );
                 group.name = "Lightset 0";
                 for each ( light in _lightsMap )
@@ -272,7 +368,8 @@ package nl.imotion.hue.manager
                 _entityMap.push( group );
             }
 
-            var groups:Object = data.groups;
+            // Update/create the groups
+            var groups:Object = fullStateData.groups;
             for ( key in groups )
             {
                 group = getGroupByID( key );
@@ -300,52 +397,12 @@ package nl.imotion.hue.manager
 
                 }
             }
-
-            if ( ! _isReady )
-            {
-                _lastHeartbeatTime = getTimer();
-                startQueue();
-
-                _isReady = true;
-
-                if ( _connectResultCallback != null )
-                {
-                    var callback:Function = _connectResultCallback;
-                    _connectResultCallback = null;
-
-                    callback();
-                }
-            }
         }
 
 
         private function handleTimerTick( e:TimerEvent ):void
         {
             processQueue();
-        }
-
-
-        private function getLightByID( id:String ):HueLight
-        {
-            for each ( var light:HueLight in _lightsMap )
-            {
-                if ( light.id == id )
-                    return light;
-            }
-
-            return null;
-        }
-
-
-        private function getGroupByID( id:String ):HueGroup
-        {
-            for each ( var group:HueGroup in _groupsMap )
-            {
-                if ( group.id == id )
-                    return group;
-            }
-
-            return null;
         }
 
         // ____________________________________________________________________________________________________
@@ -373,6 +430,9 @@ package nl.imotion.hue.manager
         }
 
 
+        /**
+         * The maximum amount of times per second a light request will be done
+         */
         public function get lightRequestRateLimit():uint
         {
             return _lightRequestRateLimit;
@@ -380,6 +440,45 @@ package nl.imotion.hue.manager
         public function set lightRequestRateLimit( value:uint ):void
         {
             _lightRequestRateLimit = value;
+        }
+
+
+        /**
+         * The maximum amount of times per second a group request will be done
+         */
+        public function get groupRequestRateLimit():uint
+        {
+            return _groupRequestRateLimit;
+        }
+        public function set groupRequestRateLimit( value:uint ):void
+        {
+            _groupRequestRateLimit = value;
+        }
+
+
+        /**
+         * The time in milliseconds between heartbeat updates (syncing the local data from the Bridge)
+         */
+        public function get heartbeatInterval():uint
+        {
+            return _heartbeatInterval;
+        }
+        public function set heartbeatInterval( value:uint ):void
+        {
+            _heartbeatInterval = value;
+        }
+
+
+        /**
+         * When used, the manager will attempt to make any light changes as smooth as possible, by automatically setting the transitiontime
+         */
+        public function get useTransitionSmoothing():Boolean
+        {
+            return _useTransitionSmoothing;
+        }
+        public function set useTransitionSmoothing( value:Boolean ):void
+        {
+            _useTransitionSmoothing = value;
         }
 
 
