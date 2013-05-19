@@ -26,13 +26,12 @@
 
 package nl.imotion.hue.connector
 {
+    import flash.geom.Point;
     import flash.net.URLRequestMethod;
 
     import nl.imotion.delegates.AsyncDelegate;
     import nl.imotion.delegates.events.AsyncDelegateEvent;
-
-    import spark.primitives.Path;
-
+    import nl.imotion.utils.range.Range;
 
     /**
      * @author Pieter van de Sluis
@@ -58,13 +57,30 @@ package nl.imotion.hue.connector
 
         // Common
 
-        public function discoverBridge( resultCallback:Function = null, faultCallback:Function = null ):BridgeDiscoveryDelegate
+        /**
+         * Attempts to discover the Bridge through the Hue Portal
+         *
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function discoverBridgeThroughPortal( resultCallback:Function = null, faultCallback:Function = null ):BridgeDiscoveryDelegate
         {
             return storeAndExecute( new BridgeDiscoveryDelegate( [resultCallback ], [ faultCallback ] ) ) as BridgeDiscoveryDelegate;
         }
 
 
-        public function doRequest( path:String = "", data:Object = null, method:String = URLRequestMethod.GET, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        /**
+         * Makes a request to the Hue Bridge
+         *
+         * @param path
+         * @param data
+         * @param urlRequestMethod      the <code>UrlRequestMethod</code> to be used
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function doRequest( path:String = "", data:Object = null, urlRequestMethod:String = URLRequestMethod.GET, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             var stringifiedData:String;
 
@@ -73,30 +89,48 @@ package nl.imotion.hue.connector
                 stringifiedData = JSON.stringify( data );
             }
 
-            return storeAndExecute( new HueDelegate( path, stringifiedData, method, [ resultCallback ], [ faultCallback ] ) ) as HueDelegate;
+            return storeAndExecute( new HueDelegate( path, stringifiedData, urlRequestMethod, [ resultCallback ], [ faultCallback ] ) ) as HueDelegate;
         }
 
+        // Configuration
 
+        /**
+         * Returns list of all configuration elements in the bridge.
+         *
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
         public function getConfig( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doGet( "/config", null, resultCallback, faultCallback );
         }
 
 
-        public function setConfig( data:Object,  resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        /**
+         * Allows the user to set configuration values.
+         *
+         * @param data
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function setConfig( data:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doPut( "/config", data, resultCallback, faultCallback );
         }
 
 
-        public function getFullState( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
-        {
-            return doGet( "", null, resultCallback, faultCallback );
-        }
-
-        // Registration
-
-        public function addUser( deviceType:String, userName:String = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        /**
+         * Creates a new user.
+         *
+         * @param deviceType
+         * @param userName
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function createUser( deviceType:String, userName:String = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             var data:Object =
             {
@@ -108,41 +142,113 @@ package nl.imotion.hue.connector
         }
 
 
-        public function removeUser( userName:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        /**
+         * Deletes the specified user from the whitelist.
+         *
+         * @param userName
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function deleteUser( userName:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doDelete( "/config/whitelist/" + userName, null, resultCallback, faultCallback );
         }
 
+
+        /**
+         * Fetches the entire datastore from the device, including settings and state information for lights, groups, schedules and configuration.
+         *
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function getFullState( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            return doGet( "", null, resultCallback, faultCallback );
+        }
+
         // Lights
 
-        public function doLightRequest( id:String, data:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        /**
+         * Gets the attributes and state of a given light.
+         *
+         * @param lightID               the ID of the light
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function getLight( lightID:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            return doPut( "/lights/" + id + "/state", data, resultCallback, faultCallback );
+            return doGet( "/lights/" + lightID, null, resultCallback, faultCallback );
         }
 
 
+        /**
+         * Gets a list of all lights that have been discovered by the bridge.
+         *
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function getAllLights( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            return doGet( "/lights", null, resultCallback, faultCallback );
+        }
+
+
+        /**
+         * Gets a list of lights that were discovered the last time a search for new lights was performed. The list of new lights is always deleted when a new search is started.
+         *
+         * @param resultCallback        callback to be used for a successful result    callback method for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result     callback method for an unsuccessful result
+         * @return                  the <code>HueDelegate</code> that was used in the communication
+         */
         public function getNewLights( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doGet( "/lights/new", null, resultCallback, faultCallback );
         }
 
 
+        /**
+         * Starts a search for new lights.
+         * <p>
+         * The bridge will search for 1 minute and will add a maximum of 15 new lights. To add further lights, the command needs to be sent again after the search has completed. If a search is already active, it will be aborted and a new search will start.
+         *
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
         public function searchNewLights( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doPost( "/lights", null, resultCallback, faultCallback );
         }
 
-        public function getLight( lightID:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        /**
+         * Allows the user to turn the light on and off, modify the hue and effects.
+         *
+         * @param lightID               the ID of the light
+         * @param state
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function setLightState( lightID:String, state:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            return doGet( "/lights/" + lightID, null, resultCallback, faultCallback );
+            return doPut( "/lights/" + lightID + "/state", state, resultCallback, faultCallback );
         }
 
-        public function getLights( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
-        {
-            return doGet( "/lights", null, resultCallback, faultCallback );
-        }
 
-        public function changeLightName( lightID:String, name:String, state:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        /**
+         * Used to rename lights. A light can have its name changed when in any state, including when it is unreachable or off.
+         *
+         * @param lightID               the id of the light
+         * @param name                  the new name
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function renameLight( lightID:String, name:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             var data:Object =
             {
@@ -152,14 +258,22 @@ package nl.imotion.hue.connector
             return doPut(  "/lights/" + lightID, data, resultCallback, faultCallback );
         }
 
-        public function setLightState( id:String, state:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
-        {
-            return doLightRequest( id, state, resultCallback, faultCallback );
-        }
 
-        public function setLightHSB( id:String, hue:Number = 0, saturation:Number = 0.75, brightness:Number = 1, transitionTime:Number = 10, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        /**
+         * Sets the hue, saturation and brightness of a light
+         *
+         * @param lightID               the ID of the light
+         * @param hue
+         * @param saturation
+         * @param brightness
+         * @param transitionTime        The duration of the transition from the current to the new state.
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function setLightHSB( lightID:String, hue:Number = 0, saturation:Number = 0.75, brightness:Number = 1, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            var data:Object =
+            var state:Object =
             {
                 hue:hue,
                 sat:saturation,
@@ -167,68 +281,240 @@ package nl.imotion.hue.connector
                 transitiontime:transitionTime
             };
 
-            return setLightState( id, data, resultCallback, faultCallback );
+            return setLightState( lightID, state, resultCallback, faultCallback );
         }
 
-        public function toggleLight( id:String, isSwitchedOn:Boolean, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+
+        /**
+         * Sets the mired color temperature of a light
+         * @param lightID               the ID of the light
+         * @param ct                    the mired color tempterature. Should be a value between 153 and 500.
+         * @param transitionTime        The duration of the transition from the current to the new state.
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function setLightCT( lightID:String, ct:Number = 153, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            var ctRange:Range = new Range( 153, 500 );
+
+            var state:Object =
+            {
+                ct: ctRange.constrain( ct ),
+                transitiontime:transitionTime
+            };
+
+            return setLightState( lightID, state, resultCallback, faultCallback );
+        }
+
+        /**
+         * Sets the mired color temperature of a light
+         * @param lightID               the ID of the light
+         * @param xy                    The x and y coordinates of a color in CIE color space. Both x and y must be between 0 and 1.
+         * @param transitionTime        The duration of the transition from the current to the new state.
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function setLightXY( lightID:String, xy:Point, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            var range:Range = new Range( 0, 1 );
+            var xyArr:Array = [ range.constrain( xy.x ), range.constrain( xy.y ) ];
+
+            var state:Object =
+            {
+                xy: xyArr,
+                transitiontime:transitionTime
+            };
+
+            return setLightState( lightID, state, resultCallback, faultCallback );
+        }
+
+
+        /**
+         * Sets the dynamic effect of a light
+         *
+         * @param lightID               the ID of the light
+         * @param effect
+         * @param transitionTime        The duration of the transition from the current to the new state.
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function setLightEffect( lightID:String, effect:String, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            var state:Object =
+            {
+                effect: effect,
+                transitiontime: transitionTime
+            };
+
+            return setLightState( lightID, state, resultCallback, faultCallback );
+        }
+
+
+        /**
+         * Switches a particular light on or off.
+         *
+         * @param lightID               the ID of the light
+         * @param isSwitchedOn
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function toggleLight( lightID:String, isSwitchedOn:Boolean, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             var data:Object =
             {
                 "on": isSwitchedOn
             };
 
-            return doLightRequest( id, data, resultCallback, faultCallback );
+            return setLightState( lightID, data, resultCallback, faultCallback );
         }
 
-        public function alert( id:String, isLongSelect:Boolean = false, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+
+        /**
+         * Sets the alert state for a particular light
+         *
+         * @param lightID               the ID of the light
+         * @param useBreathCycle        controls whether a single flash or a breath cycle is used
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function alertLight( lightID:String, useBreathCycle:Boolean = false, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            var alertMethod:String = isLongSelect ? "lselect" : "select";
+            var alertMethod:String = useBreathCycle ? "lselect" : "select";
 
             var data:Object =
             {
                 "alert":alertMethod
             };
 
-            return doLightRequest( id, data, resultCallback, faultCallback );
+            return setLightState( lightID, data, resultCallback, faultCallback );
         }
 
         // Groups
 
-        public function getGroups( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+
+        /**
+         * Gets a list of all groups that have been added to the bridge.
+         *
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function getAllGroups( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doGet( "/groups", null, resultCallback, faultCallback );
         }
 
-        public function getGroup( id:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+
+        /**
+         * Gets the name, light membership and last command for a given group.
+         *
+         * @param groupID               the ID of the group
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function getGroup( groupID:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            return doGet( "/groups/" + id, null, resultCallback, faultCallback );
+            return doGet( "/groups/" + groupID, null, resultCallback, faultCallback );
         }
 
-        public function setGroupName( id:String, newName:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+
+        // Not yet part of the official API
+        /*public function createGroup( data:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            return doPost( "/groups, data, resultCallback, faultCallback );
+        }*/
+
+        // Not yet part of the official API
+        /*public function deleteGroup( id:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+         {
+            return doDelete( "/groups/" + id, data, resultCallback, faultCallback );
+         }*/
+
+
+        /**
+         * Allows the user to modify the name and light membership of a group.
+         *
+         * @param groupID               the ID of the group
+         * @param name
+         * @param lightIDs              the ID of the lights
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function setGroupAttributes( groupID:String, name:String, lightIDs:Array, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             var data:Object =
             {
-                name: newName
+                name: name,
+                lights: lightIDs
             };
 
-            return doPut( "/groups/" + id, data, resultCallback, faultCallback );
+            return doPut( "/groups/" + groupID, data, resultCallback, faultCallback );
         }
 
-        public function setGroupLights( id:String, lightIDs:Array, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        /**
+         * Changes the name of a given group
+         *
+         * @param groupID               the ID of the group
+         * @param name
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function renameGroup( groupID:String, name:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            var data:Object =
+            {
+                name: name
+            };
+
+            return doPut( "/groups/" + groupID, data, resultCallback, faultCallback );
+        }
+
+
+        /**
+         * Changes the light membership of a given group
+         *
+         * @param groupID               the ID of the group
+         * @param lightIDs              the ID of the lights
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function setGroupLights( groupID:String, lightIDs:Array, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             var data:Object =
             {
                 lights: lightIDs
             };
 
-            return doPut( "/groups/" + id, data, resultCallback, faultCallback );
+            return doPut( "/groups/" + groupID, data, resultCallback, faultCallback );
         }
 
-        public function setGroupState( id:String, data:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+
+        /**
+         * Modifies the state of all lights in a group.
+         * <p>
+         * User created groups will have an ID of 1 or higher; however a special group with an ID of 0 also exists containing all the lamps known by the bridge.
+         *
+         * @param groupID               the ID of the group
+         * @param state
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function setGroupState( groupID:String, state:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            return doPut( "/groups/" + id + "/action", data, resultCallback, faultCallback );
+            return doPut( "/groups/" + groupID + "/action", state, resultCallback, faultCallback );
         }
 
+        /*
         public function setGroupHSB( id:String, hue:Number = 0, saturation:Number = 0.75, brightness:Number = 1, transitionTime:Number = 10, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             var data:Object =
@@ -241,53 +527,181 @@ package nl.imotion.hue.connector
 
             return setGroupState( id, data, onResult, onFault );
         }
+        */
 
-
-        private function toggleGroup( id:String, isSwitchedOn:Boolean, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        /**
+         * Sets the hue, saturation and brightness of a group
+         *
+         * @param groupID               the ID of the group
+         * @param hue                   hue of the light. This is a wrapping value between 0 and 65535.
+         * @param saturation            saturation of the light. 255 is the most saturated (colored) and 0 is the least saturated (white).
+         * @param brightness            brightness of the light. This is a scale from the minimum brightness the light is capable of, 0, to the maximum capable brightness, 255.
+         * @param transitionTime        The duration of the transition from the current to the new state.
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function setGroupHSB( groupID:String, hue:Number = 0, saturation:Number = 0.75, brightness:Number = 1, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            var data:Object =
+            var state:Object =
             {
-                "on": isSwitchedOn
-            }
+                hue: hue,
+                sat: saturation,
+                bri: brightness,
+                transitiontime: transitionTime
+            };
 
-            return setGroupState( id, data, resultCallback, faultCallback );
+            return setGroupState( groupID, state, resultCallback, faultCallback );
         }
 
-        // NOT SUPPORTED RIGHT NOW
 
-        /*public function addGroup( name:String, lightIDs:Array, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
-         {
-         var data:Object =
-         {
-         "name":name,
-         "lights":lightIDs
-         };
+        /**
+         * Sets the mired color temperature of a group
+         * @param groupID               the ID of the grou
+         * @param ct                    the mired color tempterature. Should be a value between 153 and 500.
+         * @param transitionTime        The duration of the transition from the current to the new state.
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function setGroupCT( groupID:String, ct:Number = 153, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            var ctRange:Range = new Range( 153, 500 );
 
-         return doPost( "/groups", data, resultCallback, faultCallback );
-         }
+            var state:Object =
+            {
+                ct: ctRange.constrain( ct ),
+                transitiontime: transitionTime
+            };
+
+            return setGroupState( groupID, state, resultCallback, faultCallback );
+        }
 
 
-         public function removeGroup( id:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
-         {
-         return doDelete( "/groups/" + id, null, resultCallback, faultCallback );
-         }*/
+        /**
+         * Sets the mired color temperature of a group
+         * @param groupID               the ID of the group
+         * @param xy                    The x and y coordinates of a color in CIE color space. Both x and y must be between 0 and 1.
+         * @param transitionTime        The duration of the transition from the current to the new state.
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function setGroupXY( groupID:String, xy:Point, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            var range:Range = new Range( 0, 1 );
+            var xyArr:Array = [ range.constrain( xy.x ), range.constrain( xy.y ) ];
+
+            var state:Object =
+            {
+                xy: xyArr,
+                transitiontime:transitionTime
+            };
+
+            return setGroupState( groupID, state, resultCallback, faultCallback );
+        }
+
+
+        /**
+         * Sets the dynamic effect of a group
+         *
+         * @param groupID               the ID of the group
+         * @param effect                the dynamic effect of the light
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function setGroupEffect( groupID:String, effect:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            var state:Object =
+            {
+                effect: effect
+            };
+
+            return setGroupState( groupID, state, resultCallback, faultCallback );
+        }
+
+
+        /**
+         * Switches a particular group on or off.
+         *
+         * @param groupID               the ID of the group
+         * @param isSwitchedOn          whether the group should be switched on or not
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function toggleGroup( groupID:String, isSwitchedOn:Boolean, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            var state:Object =
+            {
+                "on": isSwitchedOn
+            };
+
+            return setGroupState( groupID, state, resultCallback, faultCallback );
+        }
+
+
+        /**
+         * Sets the alert state for a particular group
+         *
+         * @param groupID               the ID of the group
+         * @param useBreathCycle        controls whether a single flash or a breath cycle is used
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function alertGroup( groupID:String, useBreathCycle:Boolean = false, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            var alertMethod:String = useBreathCycle ? "lselect" : "select";
+
+            var state:Object =
+            {
+                "alert": alertMethod
+            };
+
+            return setGroupState( groupID, state, resultCallback, faultCallback );
+        }
 
 
         // Schedules
 
-        public function getSchedules( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        /**
+         * Gets a list of all schedules that have been added to the bridge.
+         *
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function getAllSchedules( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doGet( "/schedules", null, resultCallback, faultCallback );
         }
 
 
+        /**
+         * Gets all attributes for a schedule.
+         *
+         * @param scheduleID
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
         public function getSchedule( scheduleID:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doGet( "/schedules/" + scheduleID, null, resultCallback, faultCallback );
         }
 
 
-        public function addSchedule( schedule:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        /**
+         * Allows the user to create a new schedule.
+         *
+         * @param schedule
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function createSchedule( schedule:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             schedule.command.address = schedule.command.address.split( "{userName}" ).join( HueDelegate.userName );
 
@@ -295,6 +709,15 @@ package nl.imotion.hue.connector
         }
 
 
+        /**
+         * Allows the user to change attributes of a schedule.
+         *
+         * @param scheduleID
+         * @param schedule
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
         public function changeSchedule( scheduleID:String, schedule:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             schedule.command.address = schedule.command.address.split( "{userName}" ).join( HueDelegate.userName );
@@ -303,9 +726,17 @@ package nl.imotion.hue.connector
         }
 
 
-        public function removeSchedule( id:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        /**
+         * Deletes a schedule from the bridge.
+         *
+         * @param scheduleID
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return
+         */
+        public function deleteSchedule( scheduleID:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
-            return doDelete( "/schedules/" + id, null, resultCallback, faultCallback );
+            return doDelete( "/schedules/" + scheduleID, null, resultCallback, faultCallback );
         }
 
 
@@ -314,6 +745,7 @@ package nl.imotion.hue.connector
 
         private function storeAndExecute( delegate:AsyncDelegate ):AsyncDelegate
         {
+            // Strong event listeners will make sure the delegate does not get garbage collected
             delegate.addEventListener( AsyncDelegateEvent.RESULT, handleDelegateResult );
             delegate.addEventListener( AsyncDelegateEvent.FAULT, handleDelegateFault );
             delegate.execute();
@@ -345,6 +777,12 @@ package nl.imotion.hue.connector
             return doRequest( path, data, URLRequestMethod.DELETE, resultCallback, faultCallback );
         }
 
+
+        private function removeDelegateListeners( delegate:* ):void
+        {
+            delegate.removeEventListener( AsyncDelegateEvent.RESULT, handleDelegateResult );
+            delegate.removeEventListener( AsyncDelegateEvent.FAULT, handleDelegateResult );
+        }
 
         // ____________________________________________________________________________________________________
         // PROTECTED
@@ -393,16 +831,14 @@ package nl.imotion.hue.connector
 
         private function handleDelegateResult( e:AsyncDelegateEvent ):void
         {
-            e.target.removeEventListener( AsyncDelegateEvent.RESULT, handleDelegateResult );
-            e.target.removeEventListener( AsyncDelegateEvent.FAULT, handleDelegateResult );
+            removeDelegateListeners( e.target );
             onResult( e.data );
         }
 
 
         private function handleDelegateFault( e:AsyncDelegateEvent ):void
         {
-            e.target.removeEventListener( AsyncDelegateEvent.RESULT, handleDelegateResult );
-            e.target.removeEventListener( AsyncDelegateEvent.FAULT, handleDelegateResult );
+            removeDelegateListeners( e.target );
             onFault( e.data );
         }
 

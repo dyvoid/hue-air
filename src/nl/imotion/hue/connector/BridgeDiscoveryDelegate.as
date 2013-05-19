@@ -126,9 +126,9 @@ package nl.imotion.hue.connector
                 return;
             }
 
-            if ( result is Array && result.length > 0 && result[0].internalipaddress )
+            if ( result is Array && result.length > 0 && result[ 0 ].internalipaddress )
             {
-                onResult( result[0].internalipaddress );
+                onResult( result[ 0 ].internalipaddress );
             }
             else
             {

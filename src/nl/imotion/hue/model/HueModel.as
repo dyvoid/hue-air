@@ -59,7 +59,7 @@ package nl.imotion.hue.model
         private var _queue:Vector.<HueEntity>;
         private var _queueTimer:Timer;
 
-        private var _lightRequestRateLimit:uint = 10;
+        private var _lightRequestRateLimit:uint = 20;
         private var _groupRequestRateLimit:uint = 1;
 
         private var _lastLightRequestTime:uint = 0;
@@ -97,13 +97,13 @@ package nl.imotion.hue.model
 
         public function discoverBridge( onResult:Function, onFault:Function ):void
         {
-            _connector.discoverBridge( onResult, onFault );
+            _connector.discoverBridgeThroughPortal( onResult, onFault );
         }
 
 
         public function register( userName:String, deviceType:String, onResult:Function, onFault:Function ):void
         {
-            _connector.addUser( userName, deviceType, onResult, onFault );
+            _connector.createUser( userName, deviceType, onResult, onFault );
         }
 
 
@@ -118,7 +118,7 @@ package nl.imotion.hue.model
 
         public function addSchedule( schedule:HueSchedule ):void
         {
-            _connector.addSchedule( schedule.toObject() );
+            _connector.createSchedule( schedule.toObject() );
         }
 
         // ____________________________________________________________________________________________________
@@ -200,7 +200,6 @@ package nl.imotion.hue.model
         {
             var updateObject:Object = entity.flushUpdateObject();
             updateObject.transitiontime = Math.floor( ( _queueTimer.delay * _queue.length ) / 100 ) + 1;
-            trace(updateObject.transitiontime);
 
             return updateObject
         }
@@ -247,6 +246,15 @@ package nl.imotion.hue.model
 
             _isReady = true;
             dispatchNote( new ModelReadyNote( _lightsMap, _groupsMap, _entityMap) );
+
+            _connector.getGroup("0");
+
+            /*_lightsMap[0].brightness = 0;
+            _lightsMap[1].brightness = 0;
+            _lightsMap[2].brightness = 0;
+            _lightsMap[3].brightness = 0;
+            TweenMax.allTo( [_lightsMap[0],_lightsMap[1],_lightsMap[2],_lightsMap[3]], 0.5, { brightness: 255, saturation: 0, ease: Quint.easeInOut } );
+            TweenMax.allTo( [_lightsMap[0],_lightsMap[1],_lightsMap[2],_lightsMap[3]], 0.5, { brightness: 155, hue: 1255, saturation: 255, ease: Quint.easeInOut, delay: 0.5 } );*/
         }
 
 
