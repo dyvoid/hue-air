@@ -55,30 +55,15 @@ package nl.imotion.hue.connector
         // ____________________________________________________________________________________________________
         // PUBLIC
 
-        // Common
-
-        /**
-         * Attempts to discover the Bridge through the Hue Portal
-         *
-         * @param resultCallback        callback to be used for a successful result
-         * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
-         */
-        public function discoverBridgeThroughPortal( resultCallback:Function = null, faultCallback:Function = null ):BridgeDiscoveryDelegate
-        {
-            return storeAndExecute( new BridgeDiscoveryDelegate( [resultCallback ], [ faultCallback ] ) ) as BridgeDiscoveryDelegate;
-        }
-
-
         /**
          * Makes a request to the Hue Bridge
          *
-         * @param path
-         * @param data
+         * @param path                  the path of the request
+         * @param data                  the data to be send
          * @param urlRequestMethod      the <code>UrlRequestMethod</code> to be used
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function doRequest( path:String = "", data:Object = null, urlRequestMethod:String = URLRequestMethod.GET, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -92,14 +77,14 @@ package nl.imotion.hue.connector
             return storeAndExecute( new HueDelegate( path, stringifiedData, urlRequestMethod, [ resultCallback ], [ faultCallback ] ) ) as HueDelegate;
         }
 
-        // Configuration
+        // --- Configuration
 
         /**
-         * Returns list of all configuration elements in the bridge.
+         * Returns a list of all configuration elements in the bridge.
          *
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function getConfig( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -110,10 +95,10 @@ package nl.imotion.hue.connector
         /**
          * Allows the user to set configuration values.
          *
-         * @param data
+         * @param data                  an object containing the configuration values
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function setConfig( data:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -124,11 +109,11 @@ package nl.imotion.hue.connector
         /**
          * Creates a new user.
          *
-         * @param deviceType
-         * @param userName
+         * @param deviceType            description of the type of device associated with this username
+         * @param userName              the user name
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function createUser( deviceType:String, userName:String = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -145,10 +130,10 @@ package nl.imotion.hue.connector
         /**
          * Deletes the specified user from the whitelist.
          *
-         * @param userName
+         * @param userName              the user name of the user that is to be deleted
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function deleteUser( userName:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -161,14 +146,32 @@ package nl.imotion.hue.connector
          *
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function getFullState( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doGet( "", null, resultCallback, faultCallback );
         }
 
-        // Lights
+        // ---
+
+        // --- Portal
+
+        /**
+         * Attempts to discover the Bridge through the Hue Portal
+         *
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
+         */
+        public function discoverBridgeThroughPortal( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            return doGet( HueDelegate.DISCOVER, null, resultCallback, faultCallback );
+        }
+
+        // ---
+
+        // --- Lights
 
         /**
          * Gets the attributes and state of a given light.
@@ -176,7 +179,7 @@ package nl.imotion.hue.connector
          * @param lightID               the ID of the light
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function getLight( lightID:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -189,7 +192,7 @@ package nl.imotion.hue.connector
          *
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function getAllLights( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -200,9 +203,9 @@ package nl.imotion.hue.connector
         /**
          * Gets a list of lights that were discovered the last time a search for new lights was performed. The list of new lights is always deleted when a new search is started.
          *
-         * @param resultCallback        callback to be used for a successful result    callback method for a successful result
-         * @param faultCallback         callback to be used for an unsuccessful result     callback method for an unsuccessful result
-         * @return                  the <code>HueDelegate</code> that was used in the communication
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function getNewLights( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -217,7 +220,7 @@ package nl.imotion.hue.connector
          *
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function searchNewLights( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -228,10 +231,10 @@ package nl.imotion.hue.connector
          * Allows the user to turn the light on and off, modify the hue and effects.
          *
          * @param lightID               the ID of the light
-         * @param state
+         * @param state                 an <code>Object</code> containing the new state of the light
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function setLightState( lightID:String, state:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -246,7 +249,7 @@ package nl.imotion.hue.connector
          * @param name                  the new name
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function renameLight( lightID:String, name:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -263,13 +266,13 @@ package nl.imotion.hue.connector
          * Sets the hue, saturation and brightness of a light
          *
          * @param lightID               the ID of the light
-         * @param hue
-         * @param saturation
-         * @param brightness
+         * @param hue                   hue of the light. This is a wrapping value between 0 and 65535.
+         * @param saturation            saturation of the light. 255 is the most saturated (colored) and 0 is the least saturated (white).
+         * @param brightness            brightness of the light. This is a scale from the minimum brightness the light is capable of, 0, to the maximum capable brightness, 255.
          * @param transitionTime        The duration of the transition from the current to the new state.
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function setLightHSB( lightID:String, hue:Number = 0, saturation:Number = 0.75, brightness:Number = 1, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -288,11 +291,11 @@ package nl.imotion.hue.connector
         /**
          * Sets the mired color temperature of a light
          * @param lightID               the ID of the light
-         * @param ct                    the mired color tempterature. Should be a value between 153 and 500.
+         * @param ct                    the mired color temperature. Should be a value between 153 and 500.
          * @param transitionTime        The duration of the transition from the current to the new state.
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function setLightCT( lightID:String, ct:Number = 153, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -314,7 +317,7 @@ package nl.imotion.hue.connector
          * @param transitionTime        The duration of the transition from the current to the new state.
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function setLightXY( lightID:String, xy:Point, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -335,11 +338,11 @@ package nl.imotion.hue.connector
          * Sets the dynamic effect of a light
          *
          * @param lightID               the ID of the light
-         * @param effect
+         * @param effect                the dynamic effect of the light
          * @param transitionTime        The duration of the transition from the current to the new state.
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function setLightEffect( lightID:String, effect:String, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -357,10 +360,10 @@ package nl.imotion.hue.connector
          * Switches a particular light on or off.
          *
          * @param lightID               the ID of the light
-         * @param isSwitchedOn
+         * @param isSwitchedOn          whether the light should be switched on or not
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function toggleLight( lightID:String, isSwitchedOn:Boolean, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -380,7 +383,7 @@ package nl.imotion.hue.connector
          * @param useBreathCycle        controls whether a single flash or a breath cycle is used
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function alertLight( lightID:String, useBreathCycle:Boolean = false, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -394,15 +397,16 @@ package nl.imotion.hue.connector
             return setLightState( lightID, data, resultCallback, faultCallback );
         }
 
-        // Groups
+        // ---
 
+        // --- Groups
 
         /**
          * Gets a list of all groups that have been added to the bridge.
          *
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function getAllGroups( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -416,7 +420,7 @@ package nl.imotion.hue.connector
          * @param groupID               the ID of the group
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function getGroup( groupID:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -424,28 +428,15 @@ package nl.imotion.hue.connector
         }
 
 
-        // Not yet part of the official API
-        /*public function createGroup( data:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
-        {
-            return doPost( "/groups, data, resultCallback, faultCallback );
-        }*/
-
-        // Not yet part of the official API
-        /*public function deleteGroup( id:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
-         {
-            return doDelete( "/groups/" + id, data, resultCallback, faultCallback );
-         }*/
-
-
         /**
          * Allows the user to modify the name and light membership of a group.
          *
          * @param groupID               the ID of the group
-         * @param name
+         * @param name                  the new name of the group
          * @param lightIDs              the ID of the lights
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function setGroupAttributes( groupID:String, name:String, lightIDs:Array, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -462,10 +453,10 @@ package nl.imotion.hue.connector
          * Changes the name of a given group
          *
          * @param groupID               the ID of the group
-         * @param name
+         * @param name                  the new name of the group
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function renameGroup( groupID:String, name:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -485,7 +476,7 @@ package nl.imotion.hue.connector
          * @param lightIDs              the ID of the lights
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function setGroupLights( groupID:String, lightIDs:Array, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -504,30 +495,16 @@ package nl.imotion.hue.connector
          * User created groups will have an ID of 1 or higher; however a special group with an ID of 0 also exists containing all the lamps known by the bridge.
          *
          * @param groupID               the ID of the group
-         * @param state
+         * @param state                 an <code>Object</code> containing the new state of the group
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function setGroupState( groupID:String, state:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doPut( "/groups/" + groupID + "/action", state, resultCallback, faultCallback );
         }
 
-        /*
-        public function setGroupHSB( id:String, hue:Number = 0, saturation:Number = 0.75, brightness:Number = 1, transitionTime:Number = 10, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
-        {
-            var data:Object =
-            {
-                hue:hue,
-                sat:saturation,
-                bri:brightness,
-                transitiontime:transitionTime
-            };
-
-            return setGroupState( id, data, onResult, onFault );
-        }
-        */
 
         /**
          * Sets the hue, saturation and brightness of a group
@@ -539,7 +516,7 @@ package nl.imotion.hue.connector
          * @param transitionTime        The duration of the transition from the current to the new state.
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function setGroupHSB( groupID:String, hue:Number = 0, saturation:Number = 0.75, brightness:Number = 1, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -557,12 +534,12 @@ package nl.imotion.hue.connector
 
         /**
          * Sets the mired color temperature of a group
-         * @param groupID               the ID of the grou
-         * @param ct                    the mired color tempterature. Should be a value between 153 and 500.
+         * @param groupID               the ID of the group
+         * @param ct                    the mired color temperature. Should be a value between 153 and 500.
          * @param transitionTime        The duration of the transition from the current to the new state.
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function setGroupCT( groupID:String, ct:Number = 153, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -585,7 +562,7 @@ package nl.imotion.hue.connector
          * @param transitionTime        The duration of the transition from the current to the new state.
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function setGroupXY( groupID:String, xy:Point, transitionTime:Number = 4, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -606,10 +583,10 @@ package nl.imotion.hue.connector
          * Sets the dynamic effect of a group
          *
          * @param groupID               the ID of the group
-         * @param effect                the dynamic effect of the light
+         * @param effect                the dynamic effect of the lights
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function setGroupEffect( groupID:String, effect:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -629,7 +606,7 @@ package nl.imotion.hue.connector
          * @param isSwitchedOn          whether the group should be switched on or not
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function toggleGroup( groupID:String, isSwitchedOn:Boolean, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -649,7 +626,7 @@ package nl.imotion.hue.connector
          * @param useBreathCycle        controls whether a single flash or a breath cycle is used
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function alertGroup( groupID:String, useBreathCycle:Boolean = false, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -663,6 +640,19 @@ package nl.imotion.hue.connector
             return setGroupState( groupID, state, resultCallback, faultCallback );
         }
 
+        // Not yet part of the official API
+        /*public function createGroup( data:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+         {
+         return doPost( "/groups, data, resultCallback, faultCallback );
+         }*/
+
+        // Not yet part of the official API
+        /*public function deleteGroup( id:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+         {
+         return doDelete( "/groups/" + id, data, resultCallback, faultCallback );
+         }*/
+
+        // ---
 
         // Schedules
 
@@ -671,7 +661,7 @@ package nl.imotion.hue.connector
          *
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function getAllSchedules( resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -682,10 +672,10 @@ package nl.imotion.hue.connector
         /**
          * Gets all attributes for a schedule.
          *
-         * @param scheduleID
+         * @param scheduleID            the ID of the schedule
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function getSchedule( scheduleID:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -696,10 +686,10 @@ package nl.imotion.hue.connector
         /**
          * Allows the user to create a new schedule.
          *
-         * @param schedule
+         * @param schedule              an <code>Object</code> containing the full schedule data
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function createSchedule( schedule:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -712,11 +702,11 @@ package nl.imotion.hue.connector
         /**
          * Allows the user to change attributes of a schedule.
          *
-         * @param scheduleID
-         * @param schedule
+         * @param scheduleID            the ID of the schedule
+         * @param schedule              an <code>Object</code> containing the full schedule data
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function changeSchedule( scheduleID:String, schedule:Object, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
@@ -729,15 +719,17 @@ package nl.imotion.hue.connector
         /**
          * Deletes a schedule from the bridge.
          *
-         * @param scheduleID
+         * @param scheduleID            the ID of the schedule
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
-         * @return
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
          */
         public function deleteSchedule( scheduleID:String, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
         {
             return doDelete( "/schedules/" + scheduleID, null, resultCallback, faultCallback );
         }
+
+        // ---
 
 
         // ____________________________________________________________________________________________________
@@ -802,29 +794,30 @@ package nl.imotion.hue.connector
         // ____________________________________________________________________________________________________
         // GETTERS / SETTERS
 
+        /**
+         * The IP Address of the Hue Bridge
+         */
         public function get ipAddress():String
         {
             return HueDelegate.ipAddress;
         }
-
-
         public function set ipAddress( value:String ):void
         {
             HueDelegate.ipAddress = value;
         }
 
 
+        /**
+         * The whitelisted user name to be used for the app
+         */
         public function get userName():String
         {
             return HueDelegate.userName;
         }
-
-
         public function set userName( value:String ):void
         {
             HueDelegate.userName = value;
         }
-
 
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS

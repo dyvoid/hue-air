@@ -45,6 +45,10 @@ package nl.imotion.hue.connector
         // ____________________________________________________________________________________________________
         // PROPERTIES
 
+        public static const DISCOVER    :String = "discover";
+
+        private static const NUPNP_URL  :String = "https://www.meethue.com/api/nupnp";
+
         private var _loader:URLLoader;
 
         private static var _ipAddress:String;
@@ -55,9 +59,9 @@ package nl.imotion.hue.connector
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
-        public function HueDelegate( operationName:String = null, requestData:String = null, method:String = URLRequestMethod.GET, resultCallbacks:/*Function*/Array = null, faultCallbacks:/*Function*/Array = null )
+        public function HueDelegate( path:String = null, requestData:String = null, method:String = URLRequestMethod.GET, resultCallbacks:/*Function*/Array = null, faultCallbacks:/*Function*/Array = null )
         {
-            super( operationName, requestData, resultCallbacks, faultCallbacks );
+            super( path, requestData, resultCallbacks, faultCallbacks );
 
             _method = method;
 
@@ -69,29 +73,36 @@ package nl.imotion.hue.connector
 
         override public function execute():void
         {
-            if ( !_ipAddress )
-                throw new Error( "Hue Bridge IP address is not set" );
-
-            if ( operationName != "register" && !_userName )
-                throw new Error( "User name is not set" );
-
-            super.execute();
-
-            addListeners();
-
             var request:URLRequest;
 
-            if ( operationName == "register" )
+            if ( operationName == DISCOVER )
             {
-                request = new URLRequest( baseURL );
+                request = new URLRequest( NUPNP_URL );
             }
             else
             {
-                request = new URLRequest( appURL + operationName );
+                if ( !_ipAddress )
+                    throw new Error( "Hue Bridge IP address is not set" );
+
+                if ( requestData && ( requestData.indexOf( "devicetype" ) != -1 ) )
+                {
+                    request = new URLRequest( baseURL );
+                }
+                else
+                {
+                    if ( !_userName )
+                        throw new Error( "User name is not set" );
+
+                    request = new URLRequest( appURL + operationName );
+                }
             }
+
+            super.execute();
 
             request.data = requestData;
             request.method = _method;
+
+            addListeners();
 
             _loader.load( request );
         }
@@ -166,7 +177,36 @@ package nl.imotion.hue.connector
         {
             removeListeners();
             trace( _loader.data );
-            onResult( JSON.parse( _loader.data ) );
+
+            var result:Object;
+
+            try
+            {
+                result = JSON.parse( _loader.data );
+            }
+            catch ( error:Error )
+            {
+                handleFault( e );
+                return;
+            }
+
+            onResult( result );
+
+            if ( operationName == DISCOVER )
+            {
+                if ( result is Array && result.length > 0 && result[ 0 ].internalipaddress )
+                {
+                    onResult( result[ 0 ].internalipaddress );
+                }
+                else
+                {
+                    onResult( null );
+                }
+            }
+            else
+            {
+
+            }
         }
 
         private function handleFault( e:Event ):void
@@ -174,7 +214,6 @@ package nl.imotion.hue.connector
             removeListeners();
             onFault( e );
         }
-
 
     }
 }

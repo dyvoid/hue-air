@@ -120,10 +120,10 @@ package nl.imotion.hue.view
 
         private function onDiscoverResult( data:* ):void
         {
-            if ( data && data is String )
+            if ( data is Array && data.length > 0 && data[ 0 ].internalipaddress )
             {
                 view.enabled = true;
-                view.setIpAddress( data as String );
+                view.setIpAddress( data[ 0 ].internalipaddress );
             }
             else
             {
