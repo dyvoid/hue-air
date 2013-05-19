@@ -34,9 +34,7 @@ package nl.imotion.hue.manager
     import nl.imotion.hue.manager.entities.HueEntity;
     import nl.imotion.hue.manager.entities.HueGroup;
     import nl.imotion.hue.manager.entities.HueLight;
-    import nl.imotion.hue.manager.entities.HueLight;
     import nl.imotion.hue.manager.entities.HueSchedule;
-    import nl.imotion.hue.ui.vo.VOLogin;
 
     /**
      * @author Pieter van de Sluis
@@ -61,7 +59,14 @@ package nl.imotion.hue.manager
         private var _lastLightRequestTime:uint = 0;
         private var _lastGroupRequestTime:uint = 0;
 
+        private var _heartbeatInterval:uint = 5000;
+        private var _lastHeartbeatTime:uint = 0;
+
         private var _isReady:Boolean = false;
+
+        private var _useTransitionSmoothing:Boolean = true;
+
+        private var _connectResultCallback:Function;
 
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
@@ -89,30 +94,32 @@ package nl.imotion.hue.manager
         // ____________________________________________________________________________________________________
         // PUBLIC
 
-        public function discoverBridge( onResult:Function, onFault:Function ):void
+        public function discoverBridge( resultCallback:Function, faultCallback:Function ):void
         {
-            _connector.discoverBridgeThroughPortal( onResult, onFault );
+            _connector.discoverBridgeThroughPortal( resultCallback, faultCallback );
         }
 
 
-        public function connect( ipAddress:String, userName:String ):void
+        public function connect( ipAddress:String, userName:String, resultCallback:Function, faultCallback:Function ):void
         {
             _connector.ipAddress = ipAddress;
             _connector.userName = userName;
 
-            _connector.getFullState( onGetFullState );
+            _connectResultCallback = resultCallback;
+
+            _connector.getFullState( onGetFullState, faultCallback );
         }
 
 
-        public function createUser( userName:String, deviceType:String, onResult:Function, onFault:Function ):void
+        public function createUser( userName:String, deviceType:String, resultCallback:Function = null, faultCallback:Function = null ):void
         {
-            _connector.createUser( userName, deviceType, onResult, onFault );
+            _connector.createUser( userName, deviceType, resultCallback, faultCallback );
         }
 
 
-        public function createSchedule( schedule:HueSchedule ):void
+        public function createSchedule( schedule:HueSchedule, resultCallback:Function = null, faultCallback:Function = null ):void
         {
-            _connector.createSchedule( schedule.toObject() );
+            _connector.createSchedule( schedule.toObject(), resultCallback, faultCallback );
         }
 
 
@@ -209,15 +216,25 @@ package nl.imotion.hue.manager
                     }
                 }
             }
+
+            if ( getTimer() - _lastHeartbeatTime > _heartbeatInterval )
+            {
+                _connector.getFullState( onGetFullState );
+                _lastHeartbeatTime = getTimer();
+            }
         }
 
 
         private function getUpdateObject( entity:HueEntity ):Object
         {
             var updateObject:Object = entity.flushUpdateObject();
-            updateObject.transitiontime = Math.floor( ( _queueTimer.delay * _queue.length ) / 100 ) + 1;
 
-            return updateObject
+            if ( _useTransitionSmoothing )
+            {
+                updateObject.transitiontime = Math.floor( ( _queueTimer.delay * _queue.length ) / 100 ) + 1;
+            }
+
+            return updateObject;
         }
 
 
@@ -228,49 +245,77 @@ package nl.imotion.hue.manager
             var lights:Object = data.lights;
             for ( key in lights )
             {
-                var light:HueLight = new HueLight( key, lights[ key ] );
+                var light:HueLight = getLightByID( key );
 
-                _lightsMap.push( light );
-                _entityMap.push( light );
-            }
-
-            // Add default group
-            var group:HueGroup = new HueGroup( "0" );
-            group.name = "All lights";
-            for each ( light in _lightsMap )
-            {
-                group.addLight( light );
-            }
-            _groupsMap.push( group );
-            _entityMap.push( group );
-
-            var groups:Object = data.groups;
-            for ( key in groups )
-            {
-                group = new HueGroup( key, groups[ key ] );
-
-                for ( var i:int = 0; i < groups[ key ].lights.length; i++ )
+                if ( !light )
                 {
-                    group.addLight( getLightByID( groups[ key ].lights[ i ] ) );
+                    light = new HueLight( key, lights[ key ] );
+                    _lightsMap.push( light );
+                    _entityMap.push( light );
                 }
+                else
+                {
+                    light.fromObject( lights[ key ] );
+                }
+            }
 
+            if ( _groupsMap.length == 0 )
+            {
+                // Add default group
+                var group:HueGroup = new HueGroup( "0" );
+                group.name = "Lightset 0";
+                for each ( light in _lightsMap )
+                {
+                    group.addLight( light );
+                }
                 _groupsMap.push( group );
                 _entityMap.push( group );
             }
 
-            startQueue();
+            var groups:Object = data.groups;
+            for ( key in groups )
+            {
+                group = getGroupByID( key );
 
-            _isReady = true;
-            //dispatchNote( new ModelReadyNote( _lightsMap, _groupsMap, _entityMap) );
+                if ( !group )
+                {
+                    group = new HueGroup( key, groups[ key ] );
 
-            _connector.getGroup("0");
+                    _groupsMap.push( group );
+                    _entityMap.push( group );
+                }
+                else
+                {
+                    group.fromObject( groups[ key ] );
+                }
 
-            /*_lightsMap[0].brightness = 0;
-             _lightsMap[1].brightness = 0;
-             _lightsMap[2].brightness = 0;
-             _lightsMap[3].brightness = 0;
-             TweenMax.allTo( [_lightsMap[0],_lightsMap[1],_lightsMap[2],_lightsMap[3]], 0.5, { brightness: 255, saturation: 0, ease: Quint.easeInOut } );
-             TweenMax.allTo( [_lightsMap[0],_lightsMap[1],_lightsMap[2],_lightsMap[3]], 0.5, { brightness: 155, hue: 1255, saturation: 255, ease: Quint.easeInOut, delay: 0.5 } );*/
+                for ( var i:int = 0; i < groups[ key ].lights.length; i++ )
+                {
+                    var lightID:String = groups[ key ].lights[ i ];
+
+                    if ( !group.getLightByID( lightID ) )
+                    {
+                        group.addLight( getLightByID( lightID ) );
+                    }
+
+                }
+            }
+
+            if ( ! _isReady )
+            {
+                _lastHeartbeatTime = getTimer();
+                startQueue();
+
+                _isReady = true;
+
+                if ( _connectResultCallback != null )
+                {
+                    var callback:Function = _connectResultCallback;
+                    _connectResultCallback = null;
+
+                    callback();
+                }
+            }
         }
 
 

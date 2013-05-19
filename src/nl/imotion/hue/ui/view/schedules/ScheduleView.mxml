@@ -46,6 +46,7 @@
         private function init():void
         {
             schedule = new HueSchedule();
+            schedule.name = "";
 
             timeHours.value = schedule.time.hours;
             timeMinutes.value = schedule.time.minutes;
@@ -61,8 +62,9 @@
 
             schedule.transitionTime = (
                     ( transitionHours.value * 60 * 60 * 10 ) +
-                            ( transitionMinutes.value * 60 * 10 ) +
-                            ( transitionSeconds.value * 10 ) );
+                    ( transitionMinutes.value * 60 * 10 ) +
+                    ( transitionSeconds.value * 10 )
+                    );
 
             if ( rbLights.selected )
             {
@@ -92,11 +94,11 @@
     <s:Form id="scheduleForm" defaultButton="{submitButton}">
 
         <s:FormItem label="Name">
-            <s:TextInput text="@{schedule.name}"/>
+            <s:TextInput id="inName" text="@{schedule.name}" maxChars="32" />
         </s:FormItem>
 
         <s:FormItem label="Description">
-            <s:TextInput text="@{schedule.description}"/>
+            <s:TextInput id="inDescription" text="@{schedule.description}" maxChars="64"/>
         </s:FormItem>
 
         <s:FormItem label="Date">

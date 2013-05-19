@@ -26,6 +26,9 @@
 
 package nl.imotion.hue.ui.view.schedules
 {
+    import mx.controls.Alert;
+    import mx.validators.ValidationResult;
+
     import nl.imotion.hue.ui.view.*;
     import flash.display.DisplayObject;
     import flash.events.Event;
@@ -93,7 +96,27 @@ package nl.imotion.hue.ui.view.schedules
 
         private function onFormSubmit( e:Event ):void
         {
-            model.createSchedule( view.schedule );
+            model.createSchedule( view.schedule, onResult, onFault );
+        }
+
+
+        private function onFault( data:* ):void
+        {
+            Alert.show( "Schedule could not be created", "Failed" );
+            view.enabled = true;
+        }
+
+
+        private function onResult( data:* ):void
+        {
+            if ( data && data is Array && data[0].success )
+            {
+                Alert.show( "Schedule has been set", "Success" );
+            }
+            else
+            {
+                onFault( null );
+            }
         }
 
     }

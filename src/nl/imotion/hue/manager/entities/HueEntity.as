@@ -155,14 +155,16 @@ package nl.imotion.hue.manager.entities
 
         protected function basePropsFromObject( basePropsObject:Object ):void
         {
-            _isOn = basePropsObject.on;
-            _hue = basePropsObject.hue;
-            _brightness = basePropsObject.bri;
-            _saturation = basePropsObject.sat;
-            _xy = new Point( basePropsObject.xy[0], basePropsObject.xy[1] );
-            _colorTemperature = basePropsObject.ct;
-            _effect = basePropsObject.effect;
+            isOn = basePropsObject.on;
+            hue = basePropsObject.hue;
+            brightness = basePropsObject.bri;
+            saturation = basePropsObject.sat;
+            xy = new Point( basePropsObject.xy[0], basePropsObject.xy[1] );
+            colorTemperature = basePropsObject.ct;
+            effect = basePropsObject.effect;
             _colorMode = basePropsObject.colormode;
+
+            flushUpdateObject();
         }
 
 

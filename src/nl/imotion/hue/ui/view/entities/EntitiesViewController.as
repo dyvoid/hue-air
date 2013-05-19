@@ -24,12 +24,21 @@
  * http://code.google.com/p/imotionproductions/
  */
 
-package nl.imotion.hue.ui.view.layout
+package nl.imotion.hue.ui.view.entities
 {
+    import mx.core.UIComponent;
+
+    import nl.imotion.bindmvc.controller.BindController;
+    import nl.imotion.hue.manager.entities.HueGroup;
+    import nl.imotion.hue.ui.model.HueModel;
+    import nl.imotion.hue.ui.notes.ModelReadyNote;
+    import nl.imotion.hue.ui.util.VectorConverter;
+
+
     /**
      * @author Pieter van de Sluis
      */
-    public class InterfaceController
+    public class EntitiesViewController extends BindController
     {
         // ____________________________________________________________________________________________________
         // PROPERTIES
@@ -38,10 +47,12 @@ package nl.imotion.hue.ui.view.layout
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
-        public function InterfaceController()
+        public function EntitiesViewController( viewComponent:UIComponent )
         {
-        }
+            super( viewComponent );
 
+            init();
+        }
 
         // ____________________________________________________________________________________________________
         // PUBLIC
@@ -50,6 +61,23 @@ package nl.imotion.hue.ui.view.layout
         // ____________________________________________________________________________________________________
         // PRIVATE
 
+        private function init():void
+        {
+            if ( !model.isReady )
+            {
+                this.startNoteInterest( ModelReadyNote.MODEL_READY, onModelReady );
+            }
+            else
+            {
+                start( model.groupsMap );
+            }
+        }
+
+
+        private function start( groupsMap:Vector.<HueGroup> ):void
+        {
+            view.groupsCollection = VectorConverter.toArrayCollection( groupsMap );
+        }
 
         // ____________________________________________________________________________________________________
         // PROTECTED
@@ -58,10 +86,26 @@ package nl.imotion.hue.ui.view.layout
         // ____________________________________________________________________________________________________
         // GETTERS / SETTERS
 
+        private function get model():HueModel
+        {
+            return retrieveModel( HueModel.NAME ) as HueModel;
+        }
+
+
+        private function get view():EntitiesView
+        {
+            return defaultView as EntitiesView;
+        }
 
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS
 
+        private function onModelReady( n:ModelReadyNote ):void
+        {
+            this.stopNoteInterest( ModelReadyNote.MODEL_READY, onModelReady );
+
+            start( n.groupsMap );
+        }
 
     }
 }

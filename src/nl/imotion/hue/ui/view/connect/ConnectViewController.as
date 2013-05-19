@@ -28,13 +28,15 @@ package nl.imotion.hue.ui.view.connect
 {
     import flash.display.DisplayObject;
     import flash.events.Event;
+    import flash.net.SharedObject;
 
     import mx.controls.Alert;
 
     import nl.imotion.bindmvc.controller.BindController;
     import nl.imotion.hue.ui.model.HueModel;
     import nl.imotion.hue.ui.util.VectorConverter;
-    import nl.imotion.hue.ui.view.events.ConnectFormEvent;
+    import nl.imotion.hue.ui.view.connect.events.ConnectFormEvent;
+    import nl.imotion.hue.ui.vo.VOLogin;
 
 
     /**
@@ -45,6 +47,7 @@ package nl.imotion.hue.ui.view.connect
         // ____________________________________________________________________________________________________
         // PROPERTIES
 
+        private var _sharedObject:SharedObject;
 
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
@@ -66,6 +69,19 @@ package nl.imotion.hue.ui.view.connect
         private function init():void
         {
             startEventInterest( view, [ ConnectFormEvent.DISCOVER, ConnectFormEvent.REGISTER, ConnectFormEvent.CONNECT ], handleLoginEvent );
+
+            _sharedObject = SharedObject.getLocal( "HueAir" );
+
+            var loginObject:Object = _sharedObject.data.loginData;
+            if ( loginObject )
+            {
+                var login:VOLogin = new VOLogin();
+                login.deviceType = loginObject.deviceType;
+                login.userName = loginObject.userName;
+                login.ipAddress = loginObject.ipAddress;
+
+                view.prefill( login );
+            }
         }
 
         // ____________________________________________________________________________________________________
@@ -105,6 +121,15 @@ package nl.imotion.hue.ui.view.connect
                     break;
 
                 case ConnectFormEvent.CONNECT:
+                    _sharedObject.data.loginData = e.loginData;
+                    try
+                    {
+                        _sharedObject.flush();
+                    } catch (error:Error)
+                    {
+                        // If the shared object wasn't saved, too bad
+                    }
+
                     model.connect( e.loginData );
                     break;
             }

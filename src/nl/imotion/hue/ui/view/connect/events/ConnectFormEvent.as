@@ -24,7 +24,7 @@
  * http://code.google.com/p/imotionproductions/
  */
 
-package nl.imotion.hue.ui.view.events
+package nl.imotion.hue.ui.view.connect.events
 {
     import flash.events.Event;
 

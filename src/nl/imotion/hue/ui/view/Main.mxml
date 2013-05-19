@@ -35,8 +35,8 @@
         import nl.imotion.hue.ui.model.HueModel;
         import nl.imotion.hue.ui.view.connect.ConnectView;
         import nl.imotion.hue.ui.view.connect.ConnectViewController;
-        import nl.imotion.hue.ui.view.lights.EntitiesView;
-        import nl.imotion.hue.ui.view.lights.EntitiesViewController;
+        import nl.imotion.hue.ui.view.entities.EntitiesView;
+        import nl.imotion.hue.ui.view.entities.EntitiesViewController;
         import nl.imotion.hue.ui.view.schedules.ScheduleView;
         import nl.imotion.hue.ui.view.schedules.ScheduleViewController;
 
@@ -66,6 +66,6 @@
 
 
     <connect:ConnectView includeIn="loggedOut"/>
-    <layout:Interface includeIn="loggedIn"/>
+    <layout:Layout includeIn="loggedIn"/>
 
 </s:Application>

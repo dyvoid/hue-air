@@ -56,7 +56,7 @@
         }
         ]]></fx:Script>
 
-    <s:DataGroup id="dataGroup" dataProvider="{_groupsCollection}" itemRenderer="nl.imotion.hue.ui.view.lights.GroupView" width="100%" render="init()">
+    <s:DataGroup id="dataGroup" dataProvider="{_groupsCollection}" itemRenderer="nl.imotion.hue.ui.view.entities.GroupView" width="100%" render="init()">
         <s:layout>
             <s:VerticalLayout gap="10" />
         </s:layout>
