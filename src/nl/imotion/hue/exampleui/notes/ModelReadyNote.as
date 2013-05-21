@@ -24,88 +24,50 @@
  * http://code.google.com/p/imotionproductions/
  */
 
-package nl.imotion.hue.ui.model
+package nl.imotion.hue.exampleui.notes
 {
-    import nl.imotion.bindmvc.model.BindModel;
-    import nl.imotion.hue.manager.HueManager;
     import nl.imotion.hue.manager.entities.HueEntity;
     import nl.imotion.hue.manager.entities.HueGroup;
     import nl.imotion.hue.manager.entities.HueLight;
-    import nl.imotion.hue.manager.entities.HueSchedule;
-    import nl.imotion.hue.ui.notes.ModelReadyNote;
-    import nl.imotion.hue.ui.vo.VOLogin;
+    import nl.imotion.notes.Note;
 
 
     /**
      * @author Pieter van de Sluis
      */
-    public class HueModel extends BindModel
+    public class ModelReadyNote extends Note
     {
         // ____________________________________________________________________________________________________
         // PROPERTIES
 
-        public static const NAME:String = "nl.imotion.hue.ui.model.HueModel"
+        public static const MODEL_READY:String = "modelReady";
 
-        private var _manager:HueManager;
-
-        private var _isReady:Boolean = false;
+        private var _lightsMap:Vector.<HueLight>;
+        private var _groupsMap:Vector.<HueGroup>;
+        private var _entityMap:Vector.<HueEntity>;
 
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
-        public function HueModel()
+        public function ModelReadyNote( lightsMap:Vector.<HueLight>, groupsMap:Vector.<HueGroup>, entityMap:Vector.<HueEntity> )
         {
-            super( NAME );
+            super( MODEL_READY );
 
-            init();
-        }
-
-
-        private function init():void
-        {
-            _manager = new HueManager();
+            _lightsMap = lightsMap;
+            _groupsMap = groupsMap;
+            _entityMap = entityMap;
         }
 
         // ____________________________________________________________________________________________________
         // PUBLIC
 
-        public function discoverBridge( onResult:Function, onFault:Function ):void
-        {
-            _manager.discoverBridge( onResult, onFault );
-        }
-
-
-        public function createUser( userName:String, deviceType:String, onResult:Function, onFault:Function ):void
-        {
-            _manager.createUser( userName, deviceType, onResult, onFault );
-        }
-
-
-        public function connect( loginData:VOLogin ):void
-        {
-            _manager.connect( loginData.ipAddress, loginData.userName, onConnectResult, null );
-        }
-
-
-        private function onConnectResult():void
-        {
-            dispatchNote( new ModelReadyNote( _manager.lightsMap, _manager.groupsMap, _manager.entityMap ) );
-        }
-
-
-        public function createSchedule( schedule:HueSchedule, onResult:Function, onFault:Function ):void
-        {
-            _manager.createSchedule( schedule, onResult, onFault );
-        }
 
         // ____________________________________________________________________________________________________
         // PRIVATE
 
 
-
         // ____________________________________________________________________________________________________
         // PROTECTED
-
 
 
         // ____________________________________________________________________________________________________
@@ -113,35 +75,19 @@ package nl.imotion.hue.ui.model
 
         public function get lightsMap():Vector.<HueLight>
         {
-            return _manager.lightsMap;
+            return _lightsMap;
         }
 
 
         public function get groupsMap():Vector.<HueGroup>
         {
-            return _manager.groupsMap;
+            return _groupsMap;
         }
 
 
         public function get entityMap():Vector.<HueEntity>
         {
-            return _manager.entityMap;
-        }
-
-
-        public function get isReady():Boolean
-        {
-            return _manager.isReady;
-        }
-
-
-        public function get ipAddress():String
-        {
-            return _manager.ipAddress;
-        }
-        public function set ipAddress( value:String ):void
-        {
-            _manager.ipAddress = value;
+            return _entityMap;
         }
 
         // ____________________________________________________________________________________________________

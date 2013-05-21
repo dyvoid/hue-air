@@ -24,38 +24,28 @@
  * http://code.google.com/p/imotionproductions/
  */
 
-package nl.imotion.hue.ui.view.schedules
+package nl.imotion.hue.exampleui.vo
 {
-    import mx.controls.Alert;
-    import mx.validators.ValidationResult;
-
-    import nl.imotion.hue.ui.view.*;
-    import flash.display.DisplayObject;
-    import flash.events.Event;
-
-    import nl.imotion.bindmvc.controller.BindController;
-    import nl.imotion.hue.manager.entities.HueSchedule;
-    import nl.imotion.hue.ui.model.HueModel;
-    import nl.imotion.hue.ui.util.VectorConverter;
-
-
     /**
      * @author Pieter van de Sluis
      */
-    public class ScheduleViewController extends BindController
+    public class VOLogin
     {
         // ____________________________________________________________________________________________________
         // PROPERTIES
 
+        [Bindable]
+        public var ipAddress:String;
+        [Bindable]
+        public var userName:String;
+        [Bindable]
+        public var deviceType:String;
 
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
-        public function ScheduleViewController( viewComponent:DisplayObject )
+        public function VOLogin()
         {
-            super( viewComponent );
-
-            init();
         }
 
         // ____________________________________________________________________________________________________
@@ -65,13 +55,6 @@ package nl.imotion.hue.ui.view.schedules
         // ____________________________________________________________________________________________________
         // PRIVATE
 
-        private function init():void
-        {
-            startEventInterest( defaultView, Event.COMPLETE, onFormSubmit );
-
-            view.lights = VectorConverter.toArrayCollection( model.lightsMap );
-            view.groups = VectorConverter.toArrayCollection( model.groupsMap );
-        }
 
         // ____________________________________________________________________________________________________
         // PROTECTED
@@ -80,44 +63,10 @@ package nl.imotion.hue.ui.view.schedules
         // ____________________________________________________________________________________________________
         // GETTERS / SETTERS
 
-        private function get model():HueModel
-        {
-            return retrieveModel( HueModel.NAME ) as HueModel;
-        }
-
-
-        private function get view():ScheduleView
-        {
-            return defaultView as ScheduleView;
-        }
 
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS
 
-        private function onFormSubmit( e:Event ):void
-        {
-            model.createSchedule( view.schedule, onResult, onFault );
-        }
-
-
-        private function onFault( data:* ):void
-        {
-            Alert.show( "Schedule could not be created", "Failed" );
-            view.enabled = true;
-        }
-
-
-        private function onResult( data:* ):void
-        {
-            if ( data && data is Array && data[0].success )
-            {
-                Alert.show( "Schedule has been set", "Success" );
-            }
-            else
-            {
-                onFault( null );
-            }
-        }
 
     }
 }

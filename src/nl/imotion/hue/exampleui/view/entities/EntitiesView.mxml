@@ -25,27 +25,41 @@
   - http://code.google.com/p/imotionproductions/
   -->
 
-<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-          xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:lights="nl.imotion.hue.ui.view.entities.*"
-          xmlns:schedules="nl.imotion.hue.ui.view.schedules.*"
-          paddingTop="20" paddingRight="20" paddingLeft="20" paddingBottom="20" gap="20" width="100%" height="100%">
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:mx="library://ns.adobe.com/flex/mx" width="100%">
 
     <fx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+
+        import nl.imotion.hue.exampleui.view.*;
 
 
+        [Bindable]
+        private var _groupsCollection:ArrayCollection;
+
+        private var _isInited:Boolean = false;
+
+
+        public function set groupsCollection( value:ArrayCollection ):void
+        {
+            _groupsCollection = value;
+        }
+
+
+        private function init():void
+        {
+            if ( !_isInited && dataGroup.numElements != 0 )
+            {
+                GroupView( dataGroup.getElementAt( 0 ) ).currentState = "expanded";
+                _isInited = true;
+            }
+        }
         ]]></fx:Script>
 
-    <s:TabBar dataProvider="{viewStack}"/>
+    <s:DataGroup id="dataGroup" dataProvider="{_groupsCollection}" itemRenderer="nl.imotion.hue.exampleui.view.entities.GroupView" width="100%" render="init()">
+        <s:layout>
+            <s:VerticalLayout gap="10" />
+        </s:layout>
+    </s:DataGroup>
 
-    <mx:ViewStack id="viewStack" width="100%" height="100%">
-        <s:NavigatorContent id="lights" label="Lights" width="100%">
-            <s:Scroller width="100%" height="100%">
-                <lights:EntitiesView width="100%"/>
-            </s:Scroller>
-        </s:NavigatorContent>
-        <s:NavigatorContent id="schedules" label="Schedules" width="100%">
-            <schedules:ScheduleView width="100%"/>
-        </s:NavigatorContent>
-    </mx:ViewStack>
-
-</s:VGroup>
+</s:Group>

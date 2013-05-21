@@ -24,7 +24,7 @@
  * http://code.google.com/p/imotionproductions/
  */
 
-package nl.imotion.hue.ui.view.connect
+package nl.imotion.hue.exampleui.view.connect
 {
     import flash.display.DisplayObject;
     import flash.events.Event;
@@ -33,10 +33,10 @@ package nl.imotion.hue.ui.view.connect
     import mx.controls.Alert;
 
     import nl.imotion.bindmvc.controller.BindController;
-    import nl.imotion.hue.ui.model.HueModel;
-    import nl.imotion.hue.ui.util.VectorConverter;
-    import nl.imotion.hue.ui.view.connect.events.ConnectFormEvent;
-    import nl.imotion.hue.ui.vo.VOLogin;
+    import nl.imotion.hue.exampleui.model.HueModel;
+    import nl.imotion.hue.exampleui.util.VectorConverter;
+    import nl.imotion.hue.exampleui.view.connect.events.ConnectFormEvent;
+    import nl.imotion.hue.exampleui.vo.VOLogin;
 
 
     /**

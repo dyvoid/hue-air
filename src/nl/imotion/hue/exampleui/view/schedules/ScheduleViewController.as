@@ -24,38 +24,38 @@
  * http://code.google.com/p/imotionproductions/
  */
 
-package nl.imotion.hue.ui.notes
+package nl.imotion.hue.exampleui.view.schedules
 {
-    import nl.imotion.hue.manager.entities.HueEntity;
-    import nl.imotion.hue.manager.entities.HueGroup;
-    import nl.imotion.hue.manager.entities.HueLight;
-    import nl.imotion.notes.Note;
+    import mx.controls.Alert;
+    import mx.validators.ValidationResult;
+
+    import nl.imotion.hue.exampleui.view.*;
+    import flash.display.DisplayObject;
+    import flash.events.Event;
+
+    import nl.imotion.bindmvc.controller.BindController;
+    import nl.imotion.hue.manager.entities.HueSchedule;
+    import nl.imotion.hue.exampleui.model.HueModel;
+    import nl.imotion.hue.exampleui.util.VectorConverter;
 
 
     /**
      * @author Pieter van de Sluis
      */
-    public class ModelReadyNote extends Note
+    public class ScheduleViewController extends BindController
     {
         // ____________________________________________________________________________________________________
         // PROPERTIES
 
-        public static const MODEL_READY:String = "modelReady";
-
-        private var _lightsMap:Vector.<HueLight>;
-        private var _groupsMap:Vector.<HueGroup>;
-        private var _entityMap:Vector.<HueEntity>;
 
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
-        public function ModelReadyNote( lightsMap:Vector.<HueLight>, groupsMap:Vector.<HueGroup>, entityMap:Vector.<HueEntity> )
+        public function ScheduleViewController( viewComponent:DisplayObject )
         {
-            super( MODEL_READY );
+            super( viewComponent );
 
-            _lightsMap = lightsMap;
-            _groupsMap = groupsMap;
-            _entityMap = entityMap;
+            init();
         }
 
         // ____________________________________________________________________________________________________
@@ -65,6 +65,13 @@ package nl.imotion.hue.ui.notes
         // ____________________________________________________________________________________________________
         // PRIVATE
 
+        private function init():void
+        {
+            startEventInterest( defaultView, Event.COMPLETE, onFormSubmit );
+
+            view.lights = VectorConverter.toArrayCollection( model.lightsMap );
+            view.groups = VectorConverter.toArrayCollection( model.groupsMap );
+        }
 
         // ____________________________________________________________________________________________________
         // PROTECTED
@@ -73,26 +80,44 @@ package nl.imotion.hue.ui.notes
         // ____________________________________________________________________________________________________
         // GETTERS / SETTERS
 
-        public function get lightsMap():Vector.<HueLight>
+        private function get model():HueModel
         {
-            return _lightsMap;
+            return retrieveModel( HueModel.NAME ) as HueModel;
         }
 
 
-        public function get groupsMap():Vector.<HueGroup>
+        private function get view():ScheduleView
         {
-            return _groupsMap;
-        }
-
-
-        public function get entityMap():Vector.<HueEntity>
-        {
-            return _entityMap;
+            return defaultView as ScheduleView;
         }
 
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS
 
+        private function onFormSubmit( e:Event ):void
+        {
+            model.createSchedule( view.schedule, onResult, onFault );
+        }
+
+
+        private function onFault( data:* ):void
+        {
+            Alert.show( "Schedule could not be created", "Failed" );
+            view.enabled = true;
+        }
+
+
+        private function onResult( data:* ):void
+        {
+            if ( data && data is Array && data[0].success )
+            {
+                Alert.show( "Schedule has been set", "Success" );
+            }
+            else
+            {
+                onFault( null );
+            }
+        }
 
     }
 }

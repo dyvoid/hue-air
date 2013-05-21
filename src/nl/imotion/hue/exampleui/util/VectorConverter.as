@@ -24,33 +24,46 @@
  * http://code.google.com/p/imotionproductions/
  */
 
-package nl.imotion.hue.ui.vo
+package nl.imotion.hue.exampleui.util
 {
+    import mx.collections.ArrayCollection;
+
+
     /**
      * @author Pieter van de Sluis
      */
-    public class VOLogin
+    public class VectorConverter
     {
         // ____________________________________________________________________________________________________
         // PROPERTIES
 
-        [Bindable]
-        public var ipAddress:String;
-        [Bindable]
-        public var userName:String;
-        [Bindable]
-        public var deviceType:String;
 
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
-        public function VOLogin()
-        {
-        }
 
         // ____________________________________________________________________________________________________
         // PUBLIC
 
+        public static function toArray( vector:* ):Array
+        {
+            var arr:Array = [];
+
+            vector.forEach(
+                function ( item:*, index:int, vector:* ):void
+                {
+                    arr[ arr.length ] = item;
+                }
+            );
+
+            return arr;
+        }
+
+        public static function toArrayCollection( vector:* ):ArrayCollection
+        {
+            return new ArrayCollection( toArray( vector ) );
+
+        }
 
         // ____________________________________________________________________________________________________
         // PRIVATE

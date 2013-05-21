@@ -29,18 +29,18 @@
          xmlns:mx="library://ns.adobe.com/flex/mx" horizontalCenter="0" verticalCenter="0">
 
     <fx:Metadata>
-        [Event(name="discover", type="nl.imotion.hue.ui.view.connect.events.ConnectFormEvent")]
-        [Event(name="register", type="nl.imotion.hue.ui.view.connect.events.ConnectFormEvent")]
-        [Event(name="connect", type="nl.imotion.hue.ui.view.connect.events.ConnectFormEvent")]
+        [Event(name="discover", type="nl.imotion.hue.exampleui.view.connect.events.ConnectFormEvent")]
+        [Event(name="register", type="nl.imotion.hue.exampleui.view.connect.events.ConnectFormEvent")]
+        [Event(name="connect", type="nl.imotion.hue.exampleui.view.connect.events.ConnectFormEvent")]
     </fx:Metadata>
     <fx:Script><![CDATA[
         import mx.core.IFlexDisplayObject;
         import mx.events.CloseEvent;
         import mx.managers.PopUpManager;
 
-        import nl.imotion.hue.ui.view.connect.events.ConnectFormEvent;
+        import nl.imotion.hue.exampleui.view.connect.events.ConnectFormEvent;
 
-        import nl.imotion.hue.ui.vo.VOLogin;
+        import nl.imotion.hue.exampleui.vo.VOLogin;
 
 
         [Bindable]

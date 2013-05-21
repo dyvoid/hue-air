@@ -38,7 +38,7 @@
         import mx.collections.ArrayCollection;
 
         import nl.imotion.hue.manager.entities.HueGroup;
-        import nl.imotion.hue.ui.util.VectorConverter;
+        import nl.imotion.hue.exampleui.util.VectorConverter;
 
 
         [Bindable]
@@ -110,7 +110,7 @@
             <s:fill><s:SolidColor color="0xeeeeee" /></s:fill>
         </s:Rect>
 
-        <s:DataGroup dataProvider="{_lightsCollection}" itemRenderer="nl.imotion.hue.ui.view.entities.LightView" width="100%">
+        <s:DataGroup dataProvider="{_lightsCollection}" itemRenderer="nl.imotion.hue.exampleui.view.entities.LightView" width="100%">
             <s:layout>
                 <s:TileLayout horizontalGap="10" verticalGap="10" paddingLeft="20" paddingRight="20" paddingTop="5" paddingBottom="5" />
             </s:layout>

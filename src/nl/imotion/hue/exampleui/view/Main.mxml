@@ -27,18 +27,18 @@
 
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
                xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:local="*"
-               xmlns:connect="nl.imotion.hue.ui.view.connect.*" xmlns:layout="nl.imotion.hue.ui.view.layout.*"
+               xmlns:connect="nl.imotion.hue.exampleui.view.connect.*" xmlns:layout="nl.imotion.hue.exampleui.view.layout.*"
                creationComplete="init()">
 
     <fx:Script><![CDATA[
         import nl.imotion.bindmvc.core.BindMVCCore;
-        import nl.imotion.hue.ui.model.HueModel;
-        import nl.imotion.hue.ui.view.connect.ConnectView;
-        import nl.imotion.hue.ui.view.connect.ConnectViewController;
-        import nl.imotion.hue.ui.view.entities.EntitiesView;
-        import nl.imotion.hue.ui.view.entities.EntitiesViewController;
-        import nl.imotion.hue.ui.view.schedules.ScheduleView;
-        import nl.imotion.hue.ui.view.schedules.ScheduleViewController;
+        import nl.imotion.hue.exampleui.model.HueModel;
+        import nl.imotion.hue.exampleui.view.connect.ConnectView;
+        import nl.imotion.hue.exampleui.view.connect.ConnectViewController;
+        import nl.imotion.hue.exampleui.view.entities.EntitiesView;
+        import nl.imotion.hue.exampleui.view.entities.EntitiesViewController;
+        import nl.imotion.hue.exampleui.view.schedules.ScheduleView;
+        import nl.imotion.hue.exampleui.view.schedules.ScheduleViewController;
 
 
         private var _model:HueModel;

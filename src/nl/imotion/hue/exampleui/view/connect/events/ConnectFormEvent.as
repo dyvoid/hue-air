@@ -24,11 +24,11 @@
  * http://code.google.com/p/imotionproductions/
  */
 
-package nl.imotion.hue.ui.view.connect.events
+package nl.imotion.hue.exampleui.view.connect.events
 {
     import flash.events.Event;
 
-    import nl.imotion.hue.ui.vo.VOLogin;
+    import nl.imotion.hue.exampleui.vo.VOLogin;
 
 
     /**

@@ -24,28 +24,30 @@
  * http://code.google.com/p/imotionproductions/
  */
 
-package nl.imotion.hue.ui.view
+package nl.imotion.hue.exampleui.view.entities
 {
-    import flash.display.DisplayObject;
+    import mx.core.UIComponent;
 
     import nl.imotion.bindmvc.controller.BindController;
-    import nl.imotion.hue.ui.notes.ModelReadyNote;
+    import nl.imotion.hue.manager.entities.HueGroup;
+    import nl.imotion.hue.exampleui.model.HueModel;
+    import nl.imotion.hue.exampleui.notes.ModelReadyNote;
+    import nl.imotion.hue.exampleui.util.VectorConverter;
 
 
     /**
      * @author Pieter van de Sluis
      */
-    public class MainController extends BindController
+    public class EntitiesViewController extends BindController
     {
         // ____________________________________________________________________________________________________
         // PROPERTIES
 
 
-
         // ____________________________________________________________________________________________________
         // CONSTRUCTOR
 
-        public function MainController( viewComponent:DisplayObject )
+        public function EntitiesViewController( viewComponent:UIComponent )
         {
             super( viewComponent );
 
@@ -61,7 +63,20 @@ package nl.imotion.hue.ui.view
 
         private function init():void
         {
-            startNoteInterest( ModelReadyNote.MODEL_READY, onModelReady );
+            if ( !model.isReady )
+            {
+                this.startNoteInterest( ModelReadyNote.MODEL_READY, onModelReady );
+            }
+            else
+            {
+                start( model.groupsMap );
+            }
+        }
+
+
+        private function start( groupsMap:Vector.<HueGroup> ):void
+        {
+            view.groupsCollection = VectorConverter.toArrayCollection( groupsMap );
         }
 
         // ____________________________________________________________________________________________________
@@ -71,17 +86,25 @@ package nl.imotion.hue.ui.view
         // ____________________________________________________________________________________________________
         // GETTERS / SETTERS
 
-        private function get view():Main
+        private function get model():HueModel
         {
-            return defaultView as Main;
+            return retrieveModel( HueModel.NAME ) as HueModel;
+        }
+
+
+        private function get view():EntitiesView
+        {
+            return defaultView as EntitiesView;
         }
 
         // ____________________________________________________________________________________________________
         // EVENT HANDLERS
 
-        private function onModelReady( note:ModelReadyNote ):void
+        private function onModelReady( n:ModelReadyNote ):void
         {
-            view.currentState = "loggedIn";
+            this.stopNoteInterest( ModelReadyNote.MODEL_READY, onModelReady );
+
+            start( n.groupsMap );
         }
 
     }
