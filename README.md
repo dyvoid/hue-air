@@ -1,9 +1,6 @@
 Hue AIR
 =======
-Access the Philips Hue Bridge through AS3/AIR.
-The full API has been implemented, so you can control lights, groups and schedules through the HueConnector class. 
-
-The project consists of three parts:
+Access the Philips Hue Bridge through AS3/AIR. The full API has been implemented, so you can control lights, groups and schedules through the HueConnector class. The project consists of three parts:
 
 Connector
 ---------
