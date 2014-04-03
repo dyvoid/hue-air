@@ -156,13 +156,14 @@ package nl.imotion.hue.manager.entities
         protected function basePropsFromObject( basePropsObject:Object ):void
         {
             isOn = basePropsObject.on;
-            hue = basePropsObject.hue;
-            brightness = basePropsObject.bri;
-            saturation = basePropsObject.sat;
-            xy = new Point( basePropsObject.xy[0], basePropsObject.xy[1] );
-            colorTemperature = basePropsObject.ct;
             effect = basePropsObject.effect;
-            _colorMode = basePropsObject.colormode;
+            brightness = basePropsObject.bri;
+
+            if(basePropsObject.hue != null) hue = basePropsObject.hue;
+            if(basePropsObject.sat != null) saturation = basePropsObject.sat;
+            if(basePropsObject.xy != null) xy = new Point( basePropsObject.xy[0], basePropsObject.xy[1] );
+            if(basePropsObject.ct != null) colorTemperature = basePropsObject.ct;
+            if(basePropsObject.colormode != null) _colorMode = basePropsObject.colormode;
 
             flushUpdateObject();
         }
@@ -302,6 +303,7 @@ package nl.imotion.hue.manager.entities
             _effect = value;
             addToUpdate( { effect: _effect } );
         }
+
 
         public function get colorMode():String
         {
