@@ -8,12 +8,12 @@
           <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
         </Transforms>
         <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-        <DigestValue>/lGjtoV82d94cajOqF/wBEwf+NOoUxd9Kx7I489YIwU=</DigestValue>
+        <DigestValue>jax2kjz4czVZ0PsHoAdjmIDBOPV5wyRppBt6VfiXOhE=</DigestValue>
       </Reference>
     </SignedInfo>
-    <SignatureValue Id="PackageSignatureValue">BllYoFbZH9Un/3QXbDjw76Xae9GTNbvBVGNYxtWFmdt3KJEVSN9y0s4JwnmepKq1w0p58eN2c4sp
-COI2cktHy2FNpaQo91tngnPcBlCFdHSbuqs4OEGknBT1KkF6kMUApVUCKM/QC1XYQ0vkdpgQKv6N
-DX5/Jj4Zw3W9insgLG0=</SignatureValue>
+    <SignatureValue Id="PackageSignatureValue">NvHo7llFbTNKdar6Kdzti4W1Lo78eVWw3xJW73qVDtIccQtdGSpuxecVOtKVDuWNFH+31Vrh2LA2
+VXBCzauPM2wq++r3FIF2rElnSo/qCIEIU0RKnbVeH1TvAuftCMhEMdrjj083HYR49MKbAd5dk+Pf
+u+XoyNsalLSaKRdIhi4=</SignatureValue>
     <KeyInfo>
       <X509Data>
         <X509Certificate>MIIB3DCCAUSgAwIBAgIbLTdlMTc5NDRkOjEzODA1NGMzMjJhOi04MDAwMA0GCSqGSIb3DQEBBQUA
@@ -29,7 +29,7 @@ b6lPQ9iGtRqwgNuL27QQ0ud6bJW2h59b</X509Certificate>
     </KeyInfo>
     <Object>
       <Manifest Id="PackageContents">
-        <Reference URI="mimetype"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></DigestMethod><DigestValue>0/oCb84THKMagtI0Dy0KogEu92TegdesqRr/clXct1c=</DigestValue></Reference><Reference URI="META-INF/AIR/application.xml"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></DigestMethod><DigestValue>8xi0FeoBw58+k9CFdrxE8nC6KXI12Sv4rdvDRAfdgZI=</DigestValue></Reference><Reference URI="HueAir.swf"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></DigestMethod><DigestValue>FyMaLuW0Py12OLBrw+z1xaMluZhivGfgjCbtaaPyD/w=</DigestValue></Reference>
+        <Reference URI="mimetype"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></DigestMethod><DigestValue>0/oCb84THKMagtI0Dy0KogEu92TegdesqRr/clXct1c=</DigestValue></Reference><Reference URI="META-INF/AIR/application.xml"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></DigestMethod><DigestValue>8xi0FeoBw58+k9CFdrxE8nC6KXI12Sv4rdvDRAfdgZI=</DigestValue></Reference><Reference URI="HueAir.swf"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></DigestMethod><DigestValue>lmhwu9KpLXjCzdv2IxCxH0YlPSjFOSWSx7PLSOndQtY=</DigestValue></Reference>
       </Manifest>
     </Object>
     
