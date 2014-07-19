@@ -26,7 +26,7 @@
   -->
 
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-         xmlns:mx="library://ns.adobe.com/flex/mx" horizontalCenter="0" verticalCenter="0">
+         xmlns:mx="library://ns.adobe.com/flex/mx" horizontalCenter="0" verticalCenter="0" creationComplete="init()">
 
     <fx:Metadata>
         [Event(name="discover", type="nl.imotion.hue.exampleui.view.connect.events.ConnectFormEvent")]
@@ -46,6 +46,11 @@
         [Bindable]
         private var _loginData:VOLogin;
 
+
+        private function init():void
+        {
+            _loginData = new VOLogin();
+        }
 
         private function onDiscoverClick():void
         {
@@ -103,12 +108,12 @@
         <s:TitleWindow id="registerWindow" title="Register" close="onRegisterWindowClose(event);">
             <s:Group>
                 <s:Form>
-                    <s:FormItem label="User name">
-                        <s:TextInput text="@{_loginData.userName}" width="300"/>
-                    </s:FormItem>
-
                     <s:FormItem label="Device type">
                         <s:TextInput text="@{_loginData.deviceType}" width="300"/>
+                    </s:FormItem>
+
+                    <s:FormItem label="User name">
+                        <s:TextInput text="@{_loginData.userName}" width="300"/>
                     </s:FormItem>
 
                     <s:FormItem>

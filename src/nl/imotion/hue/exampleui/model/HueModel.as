@@ -75,9 +75,9 @@ package nl.imotion.hue.exampleui.model
         }
 
 
-        public function createUser( userName:String, deviceType:String, onResult:Function, onFault:Function ):void
+        public function createUser( deviceType:String, userName:String, onResult:Function, onFault:Function ):void
         {
-            _manager.createUser( userName, deviceType, onResult, onFault );
+            _manager.createUser( deviceType, userName, onResult, onFault );
         }
 
 

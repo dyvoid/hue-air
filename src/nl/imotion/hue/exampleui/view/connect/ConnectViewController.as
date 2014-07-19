@@ -117,7 +117,7 @@ package nl.imotion.hue.exampleui.view.connect
 
                 case ConnectFormEvent.REGISTER:
                     model.ipAddress = e.loginData.ipAddress;
-                    model.createUser( e.loginData.userName, e.loginData.deviceType, onRegisterResult, onRegisterFault );
+                    model.createUser( e.loginData.deviceType, e.loginData.userName, onRegisterResult, onRegisterFault );
                     break;
 
                 case ConnectFormEvent.CONNECT:
