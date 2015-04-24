@@ -401,6 +401,26 @@ package nl.imotion.hue.connector
 
         // --- Groups
 
+		 /**
+         * Creates a new group containing the lights specified and optional name. A new group is created in the bridge with the next available id. 
+         *
+         * @param lightIDs              the ID of the lights
+         * @param name                  the name of the group
+         * @param resultCallback        callback to be used for a successful result
+         * @param faultCallback         callback to be used for an unsuccessful result
+         * @return                      the <code>HueDelegate</code> that will be used in the communication
+         */
+        public function createGroup( lightIDs:Array, name:String = null, resultCallback:Function = null, faultCallback:Function = null ):HueDelegate
+        {
+            var data:Object =
+            {
+                lights: lightIDs,
+                name: name
+            };
+
+            return doPost( "/groups", data, resultCallback, faultCallback );
+        }
+		
         /**
          * Gets a list of all groups that have been added to the bridge.
          *
