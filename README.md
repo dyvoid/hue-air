@@ -23,4 +23,4 @@ A simple AIR application, that serves mainly as an example of how the library wo
 
 
 
-You can find source code for the required iMotion library here: http://code.google.com/p/imotionproductions/
+You can find source code for the required iMotion library here: https://github.com/dyvoid/imotion-library
