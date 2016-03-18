@@ -133,7 +133,7 @@ package nl.imotion.hue.manager
          * @param resultCallback        callback to be used for a successful result
          * @param faultCallback         callback to be used for an unsuccessful result
          */
-        public function createUser( deviceType:String, userName:String, resultCallback:Function = null, faultCallback:Function = null ):void
+        public function createUser( deviceType:String, userName:String = null, resultCallback:Function = null, faultCallback:Function = null ):void
         {
             _connector.createUser(  deviceType, userName, resultCallback, faultCallback );
         }
