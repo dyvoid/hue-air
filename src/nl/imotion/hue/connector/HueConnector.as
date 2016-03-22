@@ -119,9 +119,13 @@ package nl.imotion.hue.connector
         {
             var data:Object =
             {
-                "devicetype": deviceType,
-                "username": userName
+                "devicetype": deviceType
             };
+			
+			if (userName)
+			{
+				data.username = userName;
+			}
 
             return doRequest( "", data, URLRequestMethod.POST, resultCallback, faultCallback );
         }
